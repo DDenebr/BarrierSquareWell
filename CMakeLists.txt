@@ -23,7 +23,7 @@ else ()
     message(STATUS "  Diag: Build type specified as '${CMAKE_BUILD_TYPE}'")
 endif ()
 
-set(CMAKE_CXX_FLAGS "-std=c++17 -fopenmp -ltbb")
+set(CMAKE_CXX_FLAGS "-std=c++17 -fopenmp")
 
 message(STATUS "${CMAKE_CXX_FLAGS}")
 

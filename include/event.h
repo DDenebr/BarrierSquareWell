@@ -389,14 +389,12 @@ class EDMD::SquareWellEvent : public Event
     //Default constructor
     SquareWellEvent() :
         Event(),
-        bond_status(-1),
         ptr_particle_squarewell{nullptr, nullptr},
         ptr_node_squarewell{nullptr, nullptr}{
     };
     //Constructor
-    SquareWellEvent(const double& time, const int& bond_status, PtrParticleEDMD& particle_squarewell1, PtrParticleEDMD& particle_squarewell2) :
+    SquareWellEvent(const double& time, PtrParticleEDMD& particle_squarewell1, PtrParticleEDMD& particle_squarewell2) :
         Event(time),
-        bond_status(bond_status),
         ptr_particle_squarewell{&particle_squarewell1, &particle_squarewell2},
         ptr_node_squarewell{}{ 
     };
@@ -413,7 +411,6 @@ class EDMD::SquareWellEvent : public Event
     //Swap (copy and swap idiom) 
     void swap(SquareWellEvent& squarewell_event){
         std::swap(t, squarewell_event.t);
-        std::swap(bond_status, squarewell_event.bond_status);
         std::swap(ptr_particle_squarewell, squarewell_event.ptr_particle_squarewell);
         std::swap(ptr_node_squarewell, squarewell_event.ptr_node_squarewell);
     };
@@ -428,7 +425,6 @@ class EDMD::SquareWellEvent : public Event
     };
 
     protected:
-    int bond_status;                                               //Bond status, 1 two particle in square well; -1 two particle out square well
     array<PtrParticleEDMD*, 2> ptr_particle_squarewell;
     array<Node*, 2> ptr_node_squarewell;
 };

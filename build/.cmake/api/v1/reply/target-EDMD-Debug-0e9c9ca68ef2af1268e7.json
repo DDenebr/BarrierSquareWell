@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "/home/raop0002/BarrierSquareWell/lib/libEDMD.so"
+			"path" : "/home/peilin/Dropbox/BarrierSquareWell/lib/libEDMD.so"
 		}
 	],
 	"backtrace" : 1,
@@ -46,7 +46,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-std=c++17 -fopenmp -ltbb -g -fPIC"
+					"fragment" : "-std=c++17 -fopenmp -g -fPIC"
 				}
 			],
 			"defines" : 
@@ -59,7 +59,7 @@
 			[
 				{
 					"backtrace" : 3,
-					"path" : "/home/raop0002/BarrierSquareWell/include"
+					"path" : "/home/peilin/Dropbox/BarrierSquareWell/include"
 				}
 			],
 			"language" : "CXX",

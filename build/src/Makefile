@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/raop0002/BarrierSquareWell
+CMAKE_SOURCE_DIR = /home/peilin/Dropbox/BarrierSquareWell
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/raop0002/BarrierSquareWell/build
+CMAKE_BINARY_DIR = /home/peilin/Dropbox/BarrierSquareWell/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -77,8 +77,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -87,14 +87,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/raop0002/BarrierSquareWell/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/raop0002/BarrierSquareWell/build/CMakeFiles /home/raop0002/BarrierSquareWell/build/src//CMakeFiles/progress.marks
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/raop0002/BarrierSquareWell/build/CMakeFiles 0
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/peilin/Dropbox/BarrierSquareWell/build/CMakeFiles /home/peilin/Dropbox/BarrierSquareWell/build/src//CMakeFiles/progress.marks
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/peilin/Dropbox/BarrierSquareWell/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/clean
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +103,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/preinstall
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/raop0002/BarrierSquareWell/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/CMakeFiles/EDMD.dir/rule:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/EDMD.dir/rule
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/EDMD.dir/rule
 .PHONY : src/CMakeFiles/EDMD.dir/rule
 
 # Convenience name for target.
@@ -127,7 +127,7 @@ EDMD: src/CMakeFiles/EDMD.dir/rule
 
 # fast build rule for target.
 EDMD/fast:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/build
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/build
 .PHONY : EDMD/fast
 
 Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.o: Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o
@@ -135,7 +135,7 @@ Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.o: Event-driven_
 
 # target to build an object file
 Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o
 .PHONY : Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o
 
 Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.i: Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.i
@@ -143,7 +143,7 @@ Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.i: Event-driven_
 
 # target to preprocess a source file
 Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.i:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.i
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.i
 .PHONY : Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.i
 
 Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.s: Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s
@@ -151,7 +151,7 @@ Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.s: Event-driven_
 
 # target to generate assembly for a file
 Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s
 .PHONY : Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s
 
 simulation_system.o: simulation_system.cpp.o
@@ -159,7 +159,7 @@ simulation_system.o: simulation_system.cpp.o
 
 # target to build an object file
 simulation_system.cpp.o:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/simulation_system.cpp.o
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/simulation_system.cpp.o
 .PHONY : simulation_system.cpp.o
 
 simulation_system.i: simulation_system.cpp.i
@@ -167,7 +167,7 @@ simulation_system.i: simulation_system.cpp.i
 
 # target to preprocess a source file
 simulation_system.cpp.i:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/simulation_system.cpp.i
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/simulation_system.cpp.i
 .PHONY : simulation_system.cpp.i
 
 simulation_system.s: simulation_system.cpp.s
@@ -175,7 +175,7 @@ simulation_system.s: simulation_system.cpp.s
 
 # target to generate assembly for a file
 simulation_system.cpp.s:
-	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/simulation_system.cpp.s
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/simulation_system.cpp.s
 .PHONY : simulation_system.cpp.s
 
 # Help Target
@@ -204,6 +204,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/raop0002/BarrierSquareWell/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/peilin/Dropbox/BarrierSquareWell/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

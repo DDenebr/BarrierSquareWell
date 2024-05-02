@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "/home/raop0002/BarrierSquareWell/bin/EDMDSquareWellBarrier"
+			"path" : "/home/peilin/Dropbox/BarrierSquareWell/bin/EDMDSquareWellBarrier"
 		}
 	],
 	"backtrace" : 1,
@@ -49,14 +49,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-std=c++17 -fopenmp -ltbb -g"
+					"fragment" : "-std=c++17 -fopenmp -g"
 				}
 			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 3,
-					"path" : "/home/raop0002/BarrierSquareWell/include"
+					"path" : "/home/peilin/Dropbox/BarrierSquareWell/include"
 				}
 			],
 			"language" : "CXX",
@@ -79,7 +79,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-std=c++17 -fopenmp -ltbb -g",
+				"fragment" : "-std=c++17 -fopenmp -g",
 				"role" : "flags"
 			},
 			{
@@ -87,7 +87,7 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/home/raop0002/BarrierSquareWell/lib",
+				"fragment" : "-Wl,-rpath,/home/peilin/Dropbox/BarrierSquareWell/lib",
 				"role" : "libraries"
 			},
 			{

@@ -56,7 +56,7 @@ array<double, 2> System::contacttime(const Particle& p1, const Particle& p2, con
         dvdv += dv[i] * dv[i];
     }
 
-    assert(drdv < 0);
+    // assert(drdv < 0);
     //Discriminant (Delta)
     double Delta = drdv * drdv - dvdv * (drdr - len * len);
 

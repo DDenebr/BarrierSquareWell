@@ -1,1 +1,1 @@
-/usr/local/gcc-12.3/bin/g++ -std=c++17 -fopenmp -ltbb -g CMakeFiles/EDMDSquareWellBarrier.dir/bin/main.cpp.o -o ../bin/EDMDSquareWellBarrier  -Wl,-rpath,/home/raop0002/BarrierSquareWell/lib ../lib/libEDMD.so 
+/usr/bin/g++ -std=c++17 -fopenmp -g CMakeFiles/EDMDSquareWellBarrier.dir/bin/main.cpp.o -o ../bin/EDMDSquareWellBarrier  -Wl,-rpath,/home/peilin/Dropbox/BarrierSquareWell/lib ../lib/libEDMD.so 

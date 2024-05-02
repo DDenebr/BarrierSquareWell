@@ -293,23 +293,21 @@ void EDMD::InitializeSquareWellNode(PtrParticleEDMD& particle_squarewell1, PtrPa
         return;
 
     //Identify bond connection status
-    int bond_status;
+    int event_t;
     if (sgn1 == array<int, 2>{1, -1} && sgn2 == array<int, 2>{1, -1})
-        bond_status = 1;
+        event_t = t[0];
     else if (sgn1 == array<int, 2>{1, 1} && sgn2 == array<int, 2>{1, 1})
-        bond_status = -1;
+        event_t = t[1];
     else
         assert(("Unexpected square well time calculation", false));
     
-    double event_t = t[(1 - bond_status)/2];
-    
     //Emplace node on event tree
-    PtrEvent squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(event_t, bond_status, particle_squarewell1, particle_squarewell2)));
-    auto itr_bool = event_tree.emplace(t[1], squarewell_event);
+    PtrEvent squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(event_t, particle_squarewell1, particle_squarewell2)));
+    auto itr_bool = event_tree.emplace(event_t, squarewell_event);
     while(!itr_bool.second){
-        event_t = std::nextafter(t[1], std::numeric_limits<double>::max());
-        squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(event_t, bond_status, particle_squarewell1, particle_squarewell2)));
-        itr_bool = event_tree.emplace(t[1], squarewell_event);
+        event_t = std::nextafter(event_t, std::numeric_limits<double>::max());
+        squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(event_t, particle_squarewell1, particle_squarewell2)));
+        itr_bool = event_tree.emplace(event_t, squarewell_event);
     }
     assert(itr_bool.second);
     AddSquareWellInParticle(itr_bool.first);
@@ -384,7 +382,7 @@ void EDMD::EraseCollideNode(const PtrParticleEDMD& particle_collide){
 
 //Erase squarewell event node
 void EDMD::EraseSquareWellNode(const PtrParticleEDMD& particle_squarewell){
-    for (auto ritr = particle_squarewell->node_collide_list.rbegin(); ritr < particle_squarewell->node_squarewell_list.rend(); ++ ritr){
+    for (auto ritr = particle_squarewell->node_squarewell_list.rbegin(); ritr < particle_squarewell->node_squarewell_list.rend(); ++ ritr){
         Node node_squarewell(*ritr);
         RemoveSquareWellFromParticle(node_squarewell);
         event_tree.erase(node_squarewell);
@@ -667,6 +665,10 @@ void EDMD::ExecuteCollideNode(const Node& node){
     }
 
     // Update squarewell event
+    EraseSquareWellNode(particle_collide1);
+    EraseSquareWellNode(particle_collide2);
+
+    InitializeSquareWellNode(particle_collide1, particle_collide2);
     for (int i = -squarewell_search_range; i <= squarewell_search_range; ++ i)
     for (int j = -squarewell_search_range; j <= squarewell_search_range; ++ j)
     for (int k = -squarewell_search_range; k <= squarewell_search_range; ++ k){
@@ -871,6 +873,9 @@ void EDMD::ExecuteSquareWellNode(const Node& node){
     }
 
     //Update squarewell event
+    EraseSquareWellNode(particle_squarewell1);
+    EraseSquareWellNode(particle_squarewell2);
+
     for (int i = -squarewell_search_range; i <= squarewell_search_range; ++ i)
     for (int j = -squarewell_search_range; j <= squarewell_search_range; ++ j)
     for (int k = -squarewell_search_range; k <= squarewell_search_range; ++ k){
@@ -905,11 +910,11 @@ void EDMD::ExecuteSquareWellNode(const Node& node){
         assert(t[0] != -1);
 
         //Emplace node on event tree
-        PtrEvent squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(t[0], 1, particle_squarewell1, particle_squarewell2)));
+        PtrEvent squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(t[0], particle_squarewell1, particle_squarewell2)));
         auto itr_bool = event_tree.emplace(t[0], squarewell_event);
         while(!itr_bool.second){
             t[0] = std::nextafter(t[0], std::numeric_limits<double>::max());
-            squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(t[0], 1, particle_squarewell1, particle_squarewell2)));
+            squarewell_event = std::dynamic_pointer_cast<Event>(make_shared<SquareWellEvent>(SquareWellEvent(t[0], particle_squarewell1, particle_squarewell2)));
             itr_bool = event_tree.emplace(t[0], squarewell_event);
         }
         assert(itr_bool.second);
@@ -989,6 +994,8 @@ void EDMD::ExecuteAndersenNode(const Node& node){
     }
 
     //Update squarewell event
+    EraseSquareWellNode(particle_andersen);
+    
     for (int i = -squarewell_search_range; i <= squarewell_search_range; ++ i)
     for (int j = -squarewell_search_range; j <= squarewell_search_range; ++ j)
     for (int k = -squarewell_search_range; k <= squarewell_search_range; ++ k){
