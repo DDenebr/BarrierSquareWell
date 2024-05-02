@@ -293,7 +293,7 @@ void EDMD::InitializeSquareWellNode(PtrParticleEDMD& particle_squarewell1, PtrPa
         return;
 
     //Identify bond connection status
-    int event_t;
+    double event_t;
     if (sgn1 == array<int, 2>{1, -1} && sgn2 == array<int, 2>{1, -1})
         event_t = t[0];
     else if (sgn1 == array<int, 2>{1, 1} && sgn2 == array<int, 2>{1, 1})
@@ -1117,6 +1117,8 @@ void EDMD::ExecuteEventTree(){
         return;
     const Node& node_execute = event_tree.begin();
     const PtrEvent& event_execute = node_execute->second;
+
+    cout << event_execute->t << ' ' << event_execute->Type() << endl;
 
     if (event_execute->Type() == "cross")
         ExecuteCrossNode(node_execute);

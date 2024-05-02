@@ -1,17 +1,17 @@
 [
 {
-  "directory": "/home/peilin/Dropbox/BarrierSquareWell/build",
-  "command": "/usr/bin/g++  -I/home/peilin/Dropbox/BarrierSquareWell/include -std=c++17 -fopenmp -g -o CMakeFiles/EDMDSquareWellBarrier.dir/bin/main.cpp.o -c /home/peilin/Dropbox/BarrierSquareWell/bin/main.cpp",
-  "file": "/home/peilin/Dropbox/BarrierSquareWell/bin/main.cpp"
+  "directory": "/home/raop0002/BarrierSquareWell/build",
+  "command": "/usr/local/gcc-12.3/bin/g++  -I/home/raop0002/BarrierSquareWell/include -std=c++17 -fopenmp -g -o CMakeFiles/EDMDSquareWellBarrier.dir/bin/main.cpp.o -c /home/raop0002/BarrierSquareWell/bin/main.cpp",
+  "file": "/home/raop0002/BarrierSquareWell/bin/main.cpp"
 },
 {
-  "directory": "/home/peilin/Dropbox/BarrierSquareWell/build/src",
-  "command": "/usr/bin/g++ -DEDMD_EXPORTS -I/home/peilin/Dropbox/BarrierSquareWell/include -std=c++17 -fopenmp -g -fPIC -o CMakeFiles/EDMD.dir/simulation_system.cpp.o -c /home/peilin/Dropbox/BarrierSquareWell/src/simulation_system.cpp",
-  "file": "/home/peilin/Dropbox/BarrierSquareWell/src/simulation_system.cpp"
+  "directory": "/home/raop0002/BarrierSquareWell/build/src",
+  "command": "/usr/local/gcc-12.3/bin/g++ -DEDMD_EXPORTS -I/home/raop0002/BarrierSquareWell/include -std=c++17 -fopenmp -g -fPIC -o CMakeFiles/EDMD.dir/simulation_system.cpp.o -c /home/raop0002/BarrierSquareWell/src/simulation_system.cpp",
+  "file": "/home/raop0002/BarrierSquareWell/src/simulation_system.cpp"
 },
 {
-  "directory": "/home/peilin/Dropbox/BarrierSquareWell/build/src",
-  "command": "/usr/bin/g++ -DEDMD_EXPORTS -I/home/peilin/Dropbox/BarrierSquareWell/include -std=c++17 -fopenmp -g -fPIC -o CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o -c /home/peilin/Dropbox/BarrierSquareWell/src/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp",
-  "file": "/home/peilin/Dropbox/BarrierSquareWell/src/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp"
+  "directory": "/home/raop0002/BarrierSquareWell/build/src",
+  "command": "/usr/local/gcc-12.3/bin/g++ -DEDMD_EXPORTS -I/home/raop0002/BarrierSquareWell/include -std=c++17 -fopenmp -g -fPIC -o CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o -c /home/raop0002/BarrierSquareWell/src/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp",
+  "file": "/home/raop0002/BarrierSquareWell/src/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp"
 }
 ]

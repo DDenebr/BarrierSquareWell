@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "/home/peilin/Dropbox/BarrierSquareWell/bin/EDMDSquareWellBarrier"
+			"path" : "/home/raop0002/BarrierSquareWell/bin/EDMDSquareWellBarrier"
 		}
 	],
 	"backtrace" : 1,
@@ -56,7 +56,7 @@
 			[
 				{
 					"backtrace" : 3,
-					"path" : "/home/peilin/Dropbox/BarrierSquareWell/include"
+					"path" : "/home/raop0002/BarrierSquareWell/include"
 				}
 			],
 			"language" : "CXX",
@@ -87,7 +87,7 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/home/peilin/Dropbox/BarrierSquareWell/lib",
+				"fragment" : "-Wl,-rpath,/home/raop0002/BarrierSquareWell/lib",
 				"role" : "libraries"
 			},
 			{

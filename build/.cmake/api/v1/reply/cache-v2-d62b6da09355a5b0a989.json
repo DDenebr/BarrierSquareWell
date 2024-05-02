@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/peilin/Dropbox/BarrierSquareWell/build"
+			"value" : "/home/raop0002/BarrierSquareWell/build"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -91,7 +91,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "5"
+			"value" : "2"
 		},
 		{
 			"name" : "CMAKE_COLOR_MAKEFILE",
@@ -155,11 +155,11 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "No help, variable specified on the command line."
+					"value" : "CXX compiler"
 				}
 			],
-			"type" : "FILEPATH",
-			"value" : "/usr/bin/g++"
+			"type" : "STRING",
+			"value" : "/usr/local/gcc-12.3/bin/g++"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER_AR",
@@ -175,7 +175,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/bin/gcc-ar-9"
+			"value" : "/usr/local/gcc-12.3/bin/gcc-ar"
 		},
 		{
 			"name" : "CMAKE_CXX_COMPILER_RANLIB",
@@ -191,7 +191,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/bin/gcc-ranlib-9"
+			"value" : "/usr/local/gcc-12.3/bin/gcc-ranlib"
 		},
 		{
 			"name" : "CMAKE_CXX_FLAGS",
@@ -283,7 +283,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/bin/gcc"
+			"value" : "/usr/local/gcc-12.3/bin/gcc"
 		},
 		{
 			"name" : "CMAKE_DLLTOOL",
@@ -300,6 +300,18 @@
 			],
 			"type" : "FILEPATH",
 			"value" : "CMAKE_DLLTOOL-NOTFOUND"
+		},
+		{
+			"name" : "CMAKE_EDIT_COMMAND",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to cache edit program executable."
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "/usr/bin/ccmake"
 		},
 		{
 			"name" : "CMAKE_EXECUTABLE_FORMAT",
@@ -475,7 +487,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/peilin/Dropbox/BarrierSquareWell"
+			"value" : "/home/raop0002/BarrierSquareWell"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -499,7 +511,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "1"
+			"value" : "0"
 		},
 		{
 			"name" : "CMAKE_LINKER",
@@ -531,7 +543,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "/usr/bin/make"
+			"value" : "/usr/bin/gmake"
 		},
 		{
 			"name" : "CMAKE_MODULE_LINKER_FLAGS",
@@ -823,7 +835,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/usr/share/cmake-3.20"
+			"value" : "/usr/share/cmake"
 		},
 		{
 			"name" : "CMAKE_SHARED_LINKER_FLAGS",
@@ -1043,7 +1055,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/bin/uname"
+			"value" : "/usr/bin/uname"
 		},
 		{
 			"name" : "CMAKE_VERBOSE_MAKEFILE",
@@ -1071,7 +1083,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/peilin/Dropbox/BarrierSquareWell/build"
+			"value" : "/home/raop0002/BarrierSquareWell/build"
 		},
 		{
 			"name" : "EDMDSquareWellBarrier_SOURCE_DIR",
@@ -1083,7 +1095,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/peilin/Dropbox/BarrierSquareWell"
+			"value" : "/home/raop0002/BarrierSquareWell"
 		}
 	],
 	"kind" : "cache",
