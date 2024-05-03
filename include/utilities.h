@@ -37,12 +37,6 @@ T* erase(T* const& t_ptr, vector<T>& vec){
     return t_ptr;
 };
 
-//Return sign of variable
-// template <typename T> inline constexpr
-// int sgn(T val){
-//     return (T(0) < val) - (val < T(0));
-// };
-
 
 
 #endif

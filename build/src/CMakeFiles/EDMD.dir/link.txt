@@ -1,1 +1,1 @@
-/usr/local/gcc-12.3/bin/g++ -fPIC -std=c++17 -fopenmp -g -shared -Wl,-soname,libEDMD.so -o ../../lib/libEDMD.so CMakeFiles/EDMD.dir/simulation_system.cpp.o CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o 
+/usr/local/gcc-12.3/bin/g++ -fPIC -std=c++17 -fopenmp -O3 -DNDEBUG -shared -Wl,-soname,libEDMD.so -o ../../lib/libEDMD.so CMakeFiles/EDMD.dir/initialization.cpp.o CMakeFiles/EDMD.dir/simulation_system.cpp.o CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o 

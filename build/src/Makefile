@@ -154,6 +154,30 @@ Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s:
 	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s
 .PHONY : Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.s
 
+initialization.o: initialization.cpp.o
+.PHONY : initialization.o
+
+# target to build an object file
+initialization.cpp.o:
+	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/initialization.cpp.o
+.PHONY : initialization.cpp.o
+
+initialization.i: initialization.cpp.i
+.PHONY : initialization.i
+
+# target to preprocess a source file
+initialization.cpp.i:
+	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/initialization.cpp.i
+.PHONY : initialization.cpp.i
+
+initialization.s: initialization.cpp.s
+.PHONY : initialization.s
+
+# target to generate assembly for a file
+initialization.cpp.s:
+	cd /home/raop0002/BarrierSquareWell/build && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/EDMD.dir/build.make src/CMakeFiles/EDMD.dir/initialization.cpp.s
+.PHONY : initialization.cpp.s
+
 simulation_system.o: simulation_system.cpp.o
 .PHONY : simulation_system.o
 
@@ -190,6 +214,9 @@ help:
 	@echo "... Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.o"
 	@echo "... Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.i"
 	@echo "... Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.s"
+	@echo "... initialization.o"
+	@echo "... initialization.i"
+	@echo "... initialization.s"
 	@echo "... simulation_system.o"
 	@echo "... simulation_system.i"
 	@echo "... simulation_system.s"

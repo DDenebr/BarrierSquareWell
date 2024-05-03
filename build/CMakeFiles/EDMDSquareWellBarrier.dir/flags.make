@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/raop0002/BarrierSquareWell/include
 
-CXX_FLAGS = -std=c++17 -fopenmp -g
+CXX_FLAGS = -std=c++17 -fopenmp -O3 -DNDEBUG
 

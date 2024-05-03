@@ -25,11 +25,7 @@ class System : public Parameters
     public:
 
     //Friend class
-    // friend System InitializeRandomHardSphereECMC(const Parameters& env);
-    // friend System InitializeFCCHardSphereECMC(const double& packing_fraction, const int& cell_number_per_edge, const RandomOrganizingCoefficient& random_organizing_coefficient);
-    // friend System InitializeDumpWithFCCSheetECMC(const System& dump, const int& sheet_size, const double& particle_diameter, const double& sheet_density);
-    // friend System InitializeFromDump(const string& dump_filename, const RandomOrganizingCoefficient& coef);
-    // friend System Expand(const System& system, const double& target_packing_fraction);
+    friend System InitializeRandomHardSphereECMC(const Parameters& env);
 
     //Nested struct & template
     struct Cell;
@@ -76,9 +72,6 @@ class System : public Parameters
     //Initialize particle velocity according to a initial kinetic temperature
     void InitializeParticleVelocity(const double& kinetic_temperature);
 
-    //Add a pre-defined particle cluster inside the system
-    // void AddCluster(const string& cluster_id, const double& particle_diameter, const array<double, 3>& center_of_mass, const vector<array<double, 3>>& position_vector_list);
-
     //Export system configuration to dat file, LAMMPS style
     void Dump(const path& dump_directory, const string& dump_filename, const unsigned& epoch, const double& current_time);
 
@@ -96,18 +89,6 @@ class System : public Parameters
 
 struct System::Cell
 {
-    //Friend class
-    // friend class System;
-    // friend class Particle;
-    // friend class EDMD;
-    // friend class ECMC;
-    // friend class ECMC;
-    // friend System InitializeRandomHardSphereECMC(const Parameters& env);
-    // friend System InitializeFCCHardSphereECMC(const double& packing_fraction, const int& cell_number_per_edge, const RandomOrganizingCoefficient& random_organizing_coefficient);
-    // friend System InitializeDumpWithFCCSheetECMC(const System& dump, const int& sheet_size, const double& particle_diameter, const double& sheet_density);
-    // friend System InitializeFromDump(const string& dump_filename, const RandomOrganizingCoefficient& coef);
-    // friend System Expand(const System& system, const double& target_packing_fraction);
-
     //Default constructor
     Cell(){
         particle_list.reserve(MAX_CELL_PARTICLE_LIST_SIZE);
@@ -161,18 +142,6 @@ struct System::Cell
 
 struct System::Particle
 {
-    //Friend class
-    // friend class System;
-    // friend class Cell;
-    // friend class EDMD;
-    // friend class ECMC;
-    // friend class ECMC;
-    // friend System InitializeRandomHardSphereECMC(const Parameters& env);
-    // friend System InitializeFCCHardSphereECMC(const double& packing_fraction, const int& cell_number_per_edge, const RandomOrganizingCoefficient& random_organizing_coefficient);
-    // friend System InitializeDumpWithFCCSheetECMC(const System& dump, const int& sheet_size, const double& particle_diameter, const double& sheet_density);
-    // friend System InitializeFromDump(const string& dump_filename, const RandomOrganizingCoefficient& coef);
-    // friend System Expand(const System& system, const double& target_packing_fraction);
-
     //Default Constructor
     Particle(const string& type = "", const double& diameter = 0, const double& mass = 0, const double& time = 0) : 
         type(type), 

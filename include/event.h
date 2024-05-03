@@ -90,57 +90,6 @@ class EDMD::CrossEvent : public Event
     array<int, 2>cross_direction;                   //[0], xyz directions, [1], +- directions
 };
 
-// class EDMD::RestEvent : public Event
-// {
-//     public:
-//     //Friend class
-//     friend class EDMD;
-//     friend class ParticleEDMD;
-
-//     //Type
-//     virtual string Type() const override{
-//         return "rest";
-//     }
-
-//     //Default constructor
-//     RestEvent() : 
-//         Event(),
-//         ptr_particle_rest(nullptr){
-//     };
-//     //Constructor
-//     RestEvent(const double& time, PtrParticleEDMD& particle_rest) :
-//         Event(time),
-//         ptr_particle_rest(&particle_rest){
-//     };
-//     //Copy constructor
-//     RestEvent(const RestEvent&) = default;
-//     //Move constructor
-//     RestEvent(RestEvent&&) = default;
-//     //Destructor
-//     virtual ~RestEvent() = default;
-//     //Virtual copy constructor
-//     virtual PtrEvent clone() const override {
-//         return PtrEvent(new RestEvent(*this));
-//     };
-//     //Swap (copy and swap idiom)
-//     void swap(RestEvent& rest_event){
-//         std::swap(t, rest_event.t);
-//         std::swap(ptr_particle_rest, rest_event.ptr_particle_rest);
-//     };
-//     //Unify copy assignment
-//     RestEvent& operator= (RestEvent rest_event){
-//         rest_event.swap(*this);
-//         return *this;
-//     };
-//     //Clear
-//     virtual void clear() override{
-//         RestEvent().swap(*this);
-//     };
-
-//     protected:
-//     PtrParticleEDMD* ptr_particle_rest;
-// };
-
 class EDMD::CollideEvent : public Event
 {
     public:
@@ -241,7 +190,7 @@ class EDMD::ResetEvent : public Event
 
     protected:
     inline static int epoch = 0;
-    inline static const double TIME_PER_EPOCH_ = 1e3;
+    inline static const double TIME_PER_EPOCH_ = 10;
     inline static int max_epoch = 0;
 };
 
@@ -330,15 +279,13 @@ class EDMD::AndersenThermostatEvent : public Event
     AndersenThermostatEvent() : 
         Event(),
         T_bath(0),
-        lambda(0),
-        ptr_particle_andersen(nullptr){
+        lambda(0){
     };
     //Constructor
-    AndersenThermostatEvent(const double& time, const double& T_bath, const double& lambda, PtrParticleEDMD& particle_andersen) : 
+    AndersenThermostatEvent(const double& time, const double& T_bath, const double& lambda) : 
         Event(time),
         T_bath(T_bath),
-        lambda(lambda),
-        ptr_particle_andersen(&particle_andersen){  
+        lambda(lambda){  
     };
     //Copy construcotr
     AndersenThermostatEvent(const AndersenThermostatEvent&) = default;
@@ -355,7 +302,6 @@ class EDMD::AndersenThermostatEvent : public Event
         std::swap(t, andersen_event.t);
         std::swap(T_bath, andersen_event.T_bath);
         std::swap(lambda, andersen_event.lambda);
-        std::swap(ptr_particle_andersen, andersen_event.ptr_particle_andersen);
     };
     //Unify copy assignment
     AndersenThermostatEvent& operator= (AndersenThermostatEvent andersen_event){
@@ -370,7 +316,6 @@ class EDMD::AndersenThermostatEvent : public Event
     protected:
     double T_bath;                                                //Thermostat temperature;
     double lambda;                                                //Poisson parameter, rate of thermostat > 0
-    PtrParticleEDMD* ptr_particle_andersen;                       //Particle to undergo thermostat
 };
 
 class EDMD::SquareWellEvent : public Event

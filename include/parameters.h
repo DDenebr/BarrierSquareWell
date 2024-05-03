@@ -113,14 +113,16 @@ class Parameters : public Unit, public PeriodicalSquareBox, public SquareWellCoe
         Unit(), 
         PeriodicalSquareBox(box_length, cell_number_per_edge), 
         SquareWellCoefficient(width, depth, barrier) {
-        seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        // seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        seed = 4087653448;
         gen.seed(seed);
     };
     Parameters(const PeriodicalSquareBox& simulation_box, const SquareWellCoefficient& square_well_coefficient) :
         Unit(), 
         PeriodicalSquareBox(simulation_box), 
         SquareWellCoefficient(square_well_coefficient) {
-        seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        // seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        seed = 4087653448;
         gen.seed(seed);
     };
     //Copy constructor

@@ -69,10 +69,24 @@ include src/CMakeFiles/EDMD.dir/progress.make
 # Include the compile flags for this target's objects.
 include src/CMakeFiles/EDMD.dir/flags.make
 
+src/CMakeFiles/EDMD.dir/initialization.cpp.o: src/CMakeFiles/EDMD.dir/flags.make
+src/CMakeFiles/EDMD.dir/initialization.cpp.o: ../src/initialization.cpp
+src/CMakeFiles/EDMD.dir/initialization.cpp.o: src/CMakeFiles/EDMD.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/raop0002/BarrierSquareWell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object src/CMakeFiles/EDMD.dir/initialization.cpp.o"
+	cd /home/raop0002/BarrierSquareWell/build/src && /usr/local/gcc-12.3/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/EDMD.dir/initialization.cpp.o -MF CMakeFiles/EDMD.dir/initialization.cpp.o.d -o CMakeFiles/EDMD.dir/initialization.cpp.o -c /home/raop0002/BarrierSquareWell/src/initialization.cpp
+
+src/CMakeFiles/EDMD.dir/initialization.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/EDMD.dir/initialization.cpp.i"
+	cd /home/raop0002/BarrierSquareWell/build/src && /usr/local/gcc-12.3/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/raop0002/BarrierSquareWell/src/initialization.cpp > CMakeFiles/EDMD.dir/initialization.cpp.i
+
+src/CMakeFiles/EDMD.dir/initialization.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/EDMD.dir/initialization.cpp.s"
+	cd /home/raop0002/BarrierSquareWell/build/src && /usr/local/gcc-12.3/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/raop0002/BarrierSquareWell/src/initialization.cpp -o CMakeFiles/EDMD.dir/initialization.cpp.s
+
 src/CMakeFiles/EDMD.dir/simulation_system.cpp.o: src/CMakeFiles/EDMD.dir/flags.make
 src/CMakeFiles/EDMD.dir/simulation_system.cpp.o: ../src/simulation_system.cpp
 src/CMakeFiles/EDMD.dir/simulation_system.cpp.o: src/CMakeFiles/EDMD.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/raop0002/BarrierSquareWell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object src/CMakeFiles/EDMD.dir/simulation_system.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/raop0002/BarrierSquareWell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object src/CMakeFiles/EDMD.dir/simulation_system.cpp.o"
 	cd /home/raop0002/BarrierSquareWell/build/src && /usr/local/gcc-12.3/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/EDMD.dir/simulation_system.cpp.o -MF CMakeFiles/EDMD.dir/simulation_system.cpp.o.d -o CMakeFiles/EDMD.dir/simulation_system.cpp.o -c /home/raop0002/BarrierSquareWell/src/simulation_system.cpp
 
 src/CMakeFiles/EDMD.dir/simulation_system.cpp.i: cmake_force
@@ -86,7 +100,7 @@ src/CMakeFiles/EDMD.dir/simulation_system.cpp.s: cmake_force
 src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o: src/CMakeFiles/EDMD.dir/flags.make
 src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o: ../src/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp
 src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o: src/CMakeFiles/EDMD.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/raop0002/BarrierSquareWell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/raop0002/BarrierSquareWell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o"
 	cd /home/raop0002/BarrierSquareWell/build/src && /usr/local/gcc-12.3/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o -MF CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o.d -o CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o -c /home/raop0002/BarrierSquareWell/src/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp
 
 src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.i: cmake_force
@@ -99,17 +113,19 @@ src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_d
 
 # Object files for target EDMD
 EDMD_OBJECTS = \
+"CMakeFiles/EDMD.dir/initialization.cpp.o" \
 "CMakeFiles/EDMD.dir/simulation_system.cpp.o" \
 "CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o"
 
 # External object files for target EDMD
 EDMD_EXTERNAL_OBJECTS =
 
+../lib/libEDMD.so: src/CMakeFiles/EDMD.dir/initialization.cpp.o
 ../lib/libEDMD.so: src/CMakeFiles/EDMD.dir/simulation_system.cpp.o
 ../lib/libEDMD.so: src/CMakeFiles/EDMD.dir/Event-driven_Molecular_Dynamics/event_driven_molecular_dynamics.cpp.o
 ../lib/libEDMD.so: src/CMakeFiles/EDMD.dir/build.make
 ../lib/libEDMD.so: src/CMakeFiles/EDMD.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/raop0002/BarrierSquareWell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX shared library ../../lib/libEDMD.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/raop0002/BarrierSquareWell/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX shared library ../../lib/libEDMD.so"
 	cd /home/raop0002/BarrierSquareWell/build/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/EDMD.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

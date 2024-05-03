@@ -7,7 +7,8 @@ EDMD::Tree EDMD::ParticleEDMD::NULL_TREE;
 
 EDMD::EDMD(const System& system) : 
     System(system),
-    event_tree(){
+    event_tree(),
+    virial(){
     particleEDMD_pool.reserve(MAX_SYSTEM_PARTICLE_POOL_SIZE);
     for (auto& i : particle_pool){
         particleEDMD_pool.emplace_back(make_shared<ParticleEDMD>(ParticleEDMD(*i)));
@@ -18,7 +19,7 @@ EDMD::EDMD(const System& system) :
     squarewell_search_range = static_cast<int>(std::ceil(squarewell_width));
 };
 
-void EDMD::SetSamplingParameters(const double& sample_interval, const path& dump_directory, const string& filename_kinetic_temperature){
+void EDMD::SetSamplingParameters(const double& sample_interval, const path& dump_directory){
     SampleEvent::sampling_time = 0;
     SampleEvent::sampling_interval = sample_interval;
     SampleEvent::dump_directory = dump_directory;
@@ -33,14 +34,6 @@ void EDMD::AddCrossInParticle(const Node& node_cross){
     const PtrParticleEDMD& particle_cross = *cross_event->ptr_particle_cross;
     particle_cross->node_cross = node_cross;
 };
-
-// void EDMD::AddRestInParticle(const Node& node_rest){
-//     const shared_ptr<RestEvent>& rest_event = std::dynamic_pointer_cast<RestEvent>(node_rest->second);
-//     assert(rest_event != shared_ptr<RestEvent>());  
-//     //Update pointers to event node of cross event
-//     const PtrParticleEDMD& particle_rest = *rest_event->ptr_particle_rest;
-//     particle_rest->node_rest = node_rest; 
-// }
 
 void EDMD::AddCollideInParticle(const Node& node_collide){
     const shared_ptr<CollideEvent>& collide_event = std::dynamic_pointer_cast<CollideEvent>(node_collide->second);
@@ -65,14 +58,6 @@ void EDMD::RemoveCrossFromParticle(const Node& node_cross){
     //Set the cross node stored in the cross particle to be null
     particleEDMD_pool.at(pi)->node_cross = ParticleEDMD::NULL_TREE.end();
 }
-
-// void EDMD::RemoveRestFromParticle(const Node& node_rest){
-//     const shared_ptr<RestEvent>& rest_event = std::dynamic_pointer_cast<RestEvent>(node_rest->second);
-//     assert(rest_event != shared_ptr<RestEvent>());
-//     const int& pi = index(rest_event->ptr_particle_rest, particleEDMD_pool);
-//     //Set the rest node stored in the rest particle to be null
-//     particleEDMD_pool.at(pi)->node_rest = ParticleEDMD::NULL_TREE.end();
-// }
 
 void EDMD::RemoveCollideFromParticle(const Node& node_collide){
     const shared_ptr<CollideEvent> collide_event = std::dynamic_pointer_cast<CollideEvent>(node_collide->second);
@@ -154,36 +139,6 @@ void EDMD::InitializeCrossNode(PtrParticleEDMD& particle_cross){
     assert(itr_bool.second);
     AddCrossInParticle(itr_bool.first);
 };
-
-//Initialize rest event node
-// void EDMD::InitializeRestNode(PtrParticleEDMD& particle_rest){
-//     //if no damping
-//     if (gamma == 0)
-//         return;
-
-//     const int& pi = index(&particle_rest, particleEDMD_pool);
-
-//     //Velocity to the 10^-15 of the original (double accuracy limit)
-//     const double& v = std::sqrt(std::accumulate(particle_rest->v.begin(), particle_rest->v.end(), 0.0,
-//         [](const double& sum_of_square, const double& i){ return sum_of_square + i * i;}));
-//     //Particle already at rest
-//     if (v == 0)
-//         return;
-
-//     const double& Delta_t = m / gamma * (std::log(v * m / gamma) + 15.0 * std::log(10.0));
-//     double t = Delta_t + particle_rest->t;
-
-//     // Emplace node on event tree
-//     PtrEvent rest_event = std::dynamic_pointer_cast<Event>(make_shared<RestEvent>(RestEvent(t, particle_rest)));
-//     auto itr_bool = event_tree.emplace(t, rest_event);
-//     while(!itr_bool.second){
-//         t = std::nextafter(t, std::numeric_limits<double>::max());
-//         rest_event = std::dynamic_pointer_cast<Event>(make_shared<RestEvent>(RestEvent(t, particle_rest)));
-//         itr_bool = event_tree.emplace(t, rest_event);
-//     }
-//     assert(itr_bool.second);
-//     AddRestInParticle(itr_bool.first);
-// };
 
 // Initialize collide event node
 void EDMD::InitializeCollideNode(PtrParticleEDMD& particle_collide1, PtrParticleEDMD& particle_collide2){
@@ -269,32 +224,13 @@ void EDMD::InitializeSquareWellNode(PtrParticleEDMD& particle_squarewell1, PtrPa
     const auto& sgn1 = sgn_array(t - t1);
     const auto& sgn2 = sgn_array(t - t2);
 
-    //Mistake check
-    assert(("Omit particle entering the square well",
-            !((sgn1 == array<int, 2>{1, 1} && sgn2 == array<int, 2>{1, -1}) || (sgn1 == array<int, 2>{1, -1} && sgn2 == array<int, 2>{1, 1}))));
-
-    //Overlap check
-    // if ((t[0] - t1 > 0 && t[1] - t1 < 0) || (t[0] - t1 < 0 && t[1] - t1 > 0) || 
-    //     (t[0] - t2 > 0 && t[1] - t2 < 0) || (t[0] - t2 < 0 && t[1] - t2 > 0))
-    // if (!((t[0] - t1 < 0 && t[1] - t1 < 0) || (t[0] - t2 < 0 && t[1] - t2 < 0))){
-    //     double t = (t1 > t2) ? t1 : t2;
-    //     double l = distance(*particle_collide_base1, *particle_collide_base2, t);
-    //     cerr << "Collide_Event::Initialize: Particle overlapping"<<std::endl;
-    //     cerr << "At " << t << ", contact length = " << contact_length << ", l= "<< l <<", offset="<< contact_length - l;
-    //     assert(false);
-    // }
-
-    //No collision
-    // if (t[1] == std::numeric_limits<double>::infinity())
-    //     return;
-
     //Contact before current time point
     if (sgn1 == array<int, 2>{-1, -1} || sgn2 == array<int, 2>{-1, -1})
         return;
 
     //Identify bond connection status
     double event_t;
-    if (sgn1 == array<int, 2>{1, -1} && sgn2 == array<int, 2>{1, -1})
+    if (sgn1 == array<int, 2>{1, -1} || sgn2 == array<int, 2>{1, -1})
         event_t = t[0];
     else if (sgn1 == array<int, 2>{1, 1} && sgn2 == array<int, 2>{1, 1})
         event_t = t[1];
@@ -314,17 +250,17 @@ void EDMD::InitializeSquareWellNode(PtrParticleEDMD& particle_squarewell1, PtrPa
 }
 
 //Initialize andersen event node
-void EDMD::InitializeAndersenNode(PtrParticleEDMD& particle_andersen, const double& last_thermostat_time, const double& T_bath, const double& lambda){
+void EDMD::InitializeAndersenNode(const double& last_thermostat_time, const double& T_bath, const double& lambda){
     
     std::uniform_real_distribution<double> Ur_dice(0, 1);
     double t = last_thermostat_time - std::log(Ur_dice(gen)) / lambda;
 
     // Emplace node on event tree
-    PtrEvent andersen_event = std::dynamic_pointer_cast<Event>(make_shared<AndersenThermostatEvent>(AndersenThermostatEvent(t, T_bath, lambda, particle_andersen)));
+    PtrEvent andersen_event = std::dynamic_pointer_cast<Event>(make_shared<AndersenThermostatEvent>(AndersenThermostatEvent(t, T_bath, lambda)));
     auto itr_bool = event_tree.emplace(t, andersen_event);
     while(!itr_bool.second){
         t = std::nextafter(t, std::numeric_limits<double>::max());
-        andersen_event = std::dynamic_pointer_cast<Event>(make_shared<AndersenThermostatEvent>(AndersenThermostatEvent(t, T_bath, lambda, particle_andersen)));
+        andersen_event = std::dynamic_pointer_cast<Event>(make_shared<AndersenThermostatEvent>(AndersenThermostatEvent(t, T_bath, lambda)));
         itr_bool = event_tree.emplace(t, andersen_event);
     }
     assert(itr_bool.second);
@@ -361,15 +297,6 @@ void EDMD::EraseCrossNode(const PtrParticleEDMD& particle_cross){
         event_tree.erase(node_cross);
     }
 };
-
-//Erase rest event node
-// void EDMD::EraseRestNode(const PtrParticleEDMD& particle_rest){
-//     if (particle_rest->node_rest != ParticleEDMD::NULL_TREE.end()){
-//         Node node_rest(particle_rest->node_rest);
-//         RemoveRestFromParticle(node_rest);
-//         event_tree.erase(node_rest);
-//     }
-// };
 
 //Erase collide event node
 void EDMD::EraseCollideNode(const PtrParticleEDMD& particle_collide){
@@ -444,46 +371,8 @@ void EDMD::ExecuteCrossNode(const Node& node){
         particle_cross->c[i] = (particle_cross->c[i] + cross_event->cross_direction[1] + n) % n;
     }
 
-    // Calculate the new particle velocity
-    // for (int i = 0; i < 3; ++ i)
-    //     particle_cross->v[i] *= velocity_decay;
-
     //Add particle to the new cell
     AddParticleInCell(particle_cross_base);
-
-    // array<array<int, 3>, 2> search_range;
-    // search_range[0].fill(-collision_search_range);
-    // search_range[1].fill(collision_search_range);
-
-    // //Narrow the search range to the x9 cells in moving direction
-    // for (auto& i : search_range)
-    //     i.at(cross_event->cross_direction[0]) = cross_event->cross_direction[1] * collision_search_range;
-    
-    // //Get the current collision cell list of cross particle
-    // vector<PtrParticleEDMD> collision_cell_list;
-    // collision_cell_list.reserve(particle_cross->node_collide_list.size());
-    // for (const auto& i : particle_cross->node_collide_list){
-    //     const shared_ptr<CollideEvent>& collide_event = std::dynamic_pointer_cast<CollideEvent>(i->second);
-    //     collision_cell_list.emplace_back(*collide_event->ptr_particle_collide[0] == particle_cross ? 
-    //         *collide_event->ptr_particle_collide[1] : *collide_event->ptr_particle_collide[0]);
-    // }
-
-    // //Add possible new collide events to event tree
-    // for (int i = search_range[0][0]; i <= search_range[1][0]; ++ i)
-    // for (int j = search_range[0][1]; j <= search_range[1][1]; ++ j)
-    // for (int k = search_range[0][2]; k <= search_range[1][2]; ++ k)
-    // {
-    //     const Cell& c = cell_grid[(particle_cross->c[0] + i + n) % n]
-    //                              [(particle_cross->c[1] + j + n) % n]
-    //                              [(particle_cross->c[2] + k + n) % n];
-
-    //     for (const int& l : c.particle_list){
-    //         PtrParticleEDMD& p1 = particle_cross;
-    //         PtrParticleEDMD& p2 = particleEDMD_pool.at(l);
-    //         if (std::find(collision_cell_list.begin(), collision_cell_list.end(), p2) == collision_cell_list.end())
-    //             InitializeCollideNode(p1, p2);
-    //     }
-    // }
 
     //Update squarewell event
     array<array<int, 3>, 2> search_range;
@@ -497,8 +386,9 @@ void EDMD::ExecuteCrossNode(const Node& node){
     //Get the current squarewell cell list of cross particle
     vector<PtrParticleEDMD> squarewell_cell_list;
     squarewell_cell_list.reserve(particle_cross->node_squarewell_list.size());
-    for (const auto& i : particle_cross->node_collide_list){
+    for (const auto& i : particle_cross->node_squarewell_list){
         const shared_ptr<SquareWellEvent>& squarewell_event = std::dynamic_pointer_cast<SquareWellEvent>(i->second);
+        assert(squarewell_event != shared_ptr<SquareWellEvent>());
         squarewell_cell_list.emplace_back(*squarewell_event->ptr_particle_squarewell[0] == particle_cross ? 
             *squarewell_event->ptr_particle_squarewell[1] : *squarewell_event->ptr_particle_squarewell[0]);
     }
@@ -525,30 +415,6 @@ void EDMD::ExecuteCrossNode(const Node& node){
     InitializeCrossNode(particle_cross);
 };
 
-//Execute rest node
-// void EDMD::ExecuteRestNode(const Node& node){
-//     const shared_ptr<RestEvent>& rest_event = std::dynamic_pointer_cast<RestEvent>(node->second);
-//     assert(rest_event != shared_ptr<RestEvent>());
-//     const int& pi = index(rest_event->ptr_particle_rest, particleEDMD_pool);
-
-//     PtrParticleEDMD& particle_rest = particleEDMD_pool.at(pi);
-//     PtrParticle& particle_rest_base = particle_pool.at(pi);
-
-//     // Update accumulated time stored in particle cross
-//     particle_rest->t = rest_event->t; 
-
-//     // Calculate the new particle coordinate
-//     for (int i = 0; i < 3; ++ i)
-//         particle_rest->r[i] += particle_rest->v[i] * m / gamma;
-
-//     // Calculate the new particle velocity
-//     for (int i = 0; i < 3; ++ i)
-//         particle_rest->v[i] = 0;
-    
-//     //Erase rest node
-//     EraseRestNode(particle_rest);
-// }
-
 //Execute collide node
 void EDMD::ExecuteCollideNode(const Node& node){
     const shared_ptr<CollideEvent>& collide_event = std::dynamic_pointer_cast<CollideEvent>(node->second);
@@ -559,22 +425,6 @@ void EDMD::ExecuteCollideNode(const Node& node){
     PtrParticleEDMD& particle_collide1 = particleEDMD_pool.at(pi1);
     PtrParticleEDMD& particle_collide2 = particleEDMD_pool.at(pi2);
 
-    // assert(particle_collide1->mobility || particle_collide2->mobility);
-
-    // auto t_prime = [this](const double& t){ 
-    //     if (gamma != 0)
-    //         return m / gamma * (1 - std::exp(- gamma / m * t));
-    //     else
-    //         return t;
-    // };
-
-    // auto v_decay = [this](const double& t){
-    //     if (gamma != 0)
-    //         return std::exp(- gamma / m * t);
-    //     else
-    //         return 1.0;
-    // };
-
     array<double, 3> dr{};
     array<double, 3> dv{};
     double drdv = 0;
@@ -584,10 +434,6 @@ void EDMD::ExecuteCollideNode(const Node& node){
         // Update particles' new coordinate
         particle_collide1->r[i] += particle_collide1->v[i] * (collide_event->t - particle_collide1->t);
         particle_collide2->r[i] += particle_collide2->v[i] * (collide_event->t - particle_collide2->t);
-
-        // Calculate particles' velocity just before collision
-        // particle_collide1->v[i] *= v_decay(collide_event->t - particle_collide1->t);
-        // particle_collide2->v[i] *= v_decay(collide_event->t - particle_collide2->t);
 
         // Calculate Delta r and Delta v
         dr[i] = static_cast<double>(particle_collide1->c[i] - particle_collide2->c[i]) * l + 
@@ -614,22 +460,14 @@ void EDMD::ExecuteCollideNode(const Node& node){
         particle_collide2->v[i] -= scalar_coefficient * dr[i];
     }
 
-    //Collision with immobile particle, elastic rebounce
-    // else if (particle_collide1->mobility)
-    //     for (int i = 0; i < 3; ++ i)
-    //             particle_collide1->v[i] -= 2.0 * drdv / contact_length * dr[i];
-    //     // particle_collide1->velocity(- particle_collide1->v);
-    // else if (particle_collide2->mobility)
-    //     for (int i = 0; i < 3; ++ i)
-    //             particle_collide2->v[i] += 2.0 * drdv / contact_length * dr[i];
-    //     // particle_collide2->velocity(- particle_collide2->v);
-    // else
-    //     assert(false);
-    
-
-    // Update particles' time
+    //Update particles' time
     particle_collide1->t = collide_event->t;
     particle_collide2->t = collide_event->t;
+
+    //Update virial
+    if (virial.size() >= MAX_VIRIAL_SIZE)
+        virial.pop_front();
+    virial.emplace_back(std::make_pair(collide_event->t, scalar_coefficient * dot(dr, dr)));
         
     //Update all Cross/Collide/Rest events for particles
     //Update cross event
@@ -638,13 +476,6 @@ void EDMD::ExecuteCollideNode(const Node& node){
 
     InitializeCrossNode(particle_collide1);
     InitializeCrossNode(particle_collide2);
-
-    //Update rest event
-    // EraseRestNode(particle_collide1);
-    // EraseRestNode(particle_collide2);
-
-    // InitializeRestNode(particle_collide1);
-    // InitializeRestNode(particle_collide2);
 
     // Update collide event
     EraseCollideNode(particle_collide1);
@@ -696,35 +527,6 @@ void EDMD::ExecuteCollideNode(const Node& node){
                 InitializeSquareWellNode(p1, p2);
         }    
     }
-
-
-    // for (int i = -collision_search_range; i <= collision_search_range; ++ i)
-    // for (int j = -collision_search_range; j <= collision_search_range; ++ j)
-    // for (int k = -collision_search_range; k <= collision_search_range; ++ k){
-    //     const Cell& c1 = cell_grid[(particle_collide1->c[0] + i + n) % n]
-    //                             [(particle_collide1->c[1] + j + n) % n]
-    //                             [(particle_collide1->c[2] + k + n) % n];
-
-    //     //New possible collision of collide particle 1 
-    //     for (const int& l : c1.particle_list){
-    //         PtrParticleEDMD& p1 = particle_collide1;
-    //         PtrParticleEDMD& p2 = particleEDMD_pool.at(l);
-    //         if (p2 != particle_collide1 && p2 != particle_collide2)
-    //             InitializeCollideNode(p1, p2);    
-    //     }
-        
-    //     const Cell& c2 = cell_grid[(particle_collide2->c[0] + i + n) % n]
-    //                             [(particle_collide2->c[1] + j + n) % n]
-    //                             [(particle_collide2->c[2] + k + n) % n];
-        
-    //     //New possible collision of collide particle 2 
-    //     for (const int& l : c2.particle_list){
-    //         PtrParticleEDMD& p1 = particle_collide2;
-    //         PtrParticleEDMD& p2 = particleEDMD_pool.at(l);
-    //         if (p2 != particle_collide1 && p2 != particle_collide2)
-    //             InitializeCollideNode(p1, p2);
-    //     }    
-    // }
 }
 
 void EDMD::ExecuteSquareWellNode(const Node& node){
@@ -762,11 +564,10 @@ void EDMD::ExecuteSquareWellNode(const Node& node){
     //Discrimiant for barrier cross
     assert(particle_squarewell1->m == particle_squarewell2->m);
     const double& m = particle_squarewell1->m;
-    const double& Delta_barrier = drdv * drdv - 4 * contact_length * contact_length * squarewell_barrier / m;
     const int& sign1 = sgn(drdv);                               //cross in -,cross out +
+
+    const double& Delta_barrier = drdv * drdv - 4 * contact_length * contact_length * (squarewell_barrier - (sign1 > 0) * squarewell_depth) / m;
     const int& sign2 = sgn(Delta_barrier);                      //not cross -, cross +
-    // const int& bond_identifier = squarewell_event->bond_status;
-    // const int& barrier_identifier = Delta_barrier > 0;
 
     const double& Delta = drdv * drdv + 4 * sign1 * (sign2 > 0) * contact_length * contact_length * squarewell_depth / m;
 
@@ -783,38 +584,20 @@ void EDMD::ExecuteSquareWellNode(const Node& node){
     // rebound (bond == 1, barrier == 0)
     // - drdv / contact_length / contact_length; -
 
-    // if(abs(r2-d*d)>1e-8)
-    // {
-    //     std::cerr<<"Attract_Exe: Numerical Accuracy Loss "<<abs(r2-sig*sig)<<' '<<atr->t;
-    //     exit(1);
-    // }
-
-    //Square well interaction with additional kinetic energy 
-    // const double& scalar_coefficient = (- drdv + bond_identifier * std::sqrt(Delta)) / 2.0 / contact_length / contact_length;
-    // const double& scalar_coefficient = (- drdv + std::sqrt(Delta)) / 2.0 / contact_length / contact_length;
-
     // Calculate particles' new velocities
     for (int i = 0; i < 3; ++ i){
         particle_squarewell1->v[i] += scalar_coefficient * dr[i];
         particle_squarewell2->v[i] -= scalar_coefficient * dr[i];
     }
-
-    //Collision with immobile particle, elastic rebounce
-    // else if (particle_collide1->mobility)
-    //     for (int i = 0; i < 3; ++ i)
-    //             particle_collide1->v[i] -= 2.0 * drdv / contact_length * dr[i];
-    //     // particle_collide1->velocity(- particle_collide1->v);
-    // else if (particle_collide2->mobility)
-    //     for (int i = 0; i < 3; ++ i)
-    //             particle_collide2->v[i] += 2.0 * drdv / contact_length * dr[i];
-    //     // particle_collide2->velocity(- particle_collide2->v);
-    // else
-    //     assert(false);
     
-
     //Update particles' time
     particle_squarewell1->t = squarewell_event->t;
     particle_squarewell2->t = squarewell_event->t;
+
+    //Update virial
+    if (virial.size() >= MAX_VIRIAL_SIZE)
+        virial.pop_front();
+    virial.emplace_back(std::make_pair(squarewell_event->t, scalar_coefficient * dot(dr, dr)));
 
     //Update neighbor list
     if (sign2 == 1)
@@ -846,13 +629,6 @@ void EDMD::ExecuteSquareWellNode(const Node& node){
 
     InitializeCrossNode(particle_squarewell1);
     InitializeCrossNode(particle_squarewell2);
-
-    //Update rest event
-    // EraseRestNode(particle_collide1);
-    // EraseRestNode(particle_collide2);
-
-    // InitializeRestNode(particle_collide1);
-    // InitializeRestNode(particle_collide2);
 
     //Update collide event
     EraseCollideNode(particle_squarewell1);
@@ -920,38 +696,6 @@ void EDMD::ExecuteSquareWellNode(const Node& node){
         assert(itr_bool.second);
         AddSquareWellInParticle(itr_bool.first);
     }
-    
-
-    
-
-    // for (int i = -squarewell_search_range; i <= squarewell_search_range; ++ i)
-    // for (int j = -squarewell_search_range; j <= squarewell_search_range; ++ j)
-    // for (int k = -squarewell_search_range; k <= squarewell_search_range; ++ k){
-    //     const Cell& c1 = cell_grid[(particle_squarewell1->c[0] + i + n) % n]
-    //                             [(particle_squarewell1->c[1] + j + n) % n]
-    //                             [(particle_squarewell1->c[2] + k + n) % n];
-
-    //     //New possible collision of collide particle 1 
-    //     for (const int& l : c1.particle_list){
-    //         PtrParticleEDMD& p1 = particle_squarewell1;
-    //         PtrParticleEDMD& p2 = particleEDMD_pool.at(l);
-    //         if (p2 != particle_collide1 && p2 != particle_collide2)
-    //             InitializeCollideNode(p1, p2);    
-    //     }
-        
-    //     const Cell& c2 = cell_grid[(particle_collide2->c[0] + i + n) % n]
-    //                             [(particle_collide2->c[1] + j + n) % n]
-    //                             [(particle_collide2->c[2] + k + n) % n];
-        
-    //     //New possible collision of collide particle 2 
-    //     for (const int& l : c2.particle_list){
-    //         PtrParticleEDMD& p1 = particle_collide2;
-    //         PtrParticleEDMD& p2 = particleEDMD_pool.at(l);
-    //         if (p2 != particle_collide1 && p2 != particle_collide2)
-    //             InitializeCollideNode(p1, p2);
-    //     }    
-    // }
-
 }
 
 //Execute andersen thermostat event
@@ -970,6 +714,7 @@ void EDMD::ExecuteAndersenNode(const Node& node){
 
     //Re-assign velocity
     const double& T_bath = andersen_event->T_bath;
+    const double& lambda = andersen_event->lambda;
     const double& m = particle_andersen->m;
 
     std::normal_distribution<double> Nr_dice(0, std::sqrt(kB * T_bath / m));
@@ -1011,6 +756,10 @@ void EDMD::ExecuteAndersenNode(const Node& node){
                 InitializeSquareWellNode(p1, p2);    
         }
     }
+
+    //Re-initialize Andersen thermostat
+    EraseAndersenNode(node);
+    InitializeAndersenNode(andersen_event->t, T_bath, lambda);
 }
 
 //Execute reset event
@@ -1018,24 +767,9 @@ void EDMD::ExecuteResetNode(const Node& node){
     const shared_ptr<ResetEvent>& reset_event = std::dynamic_pointer_cast<ResetEvent>(node->second);
     assert(reset_event != shared_ptr<ResetEvent>());
 
-    // auto t_prime = [this](const double& t){ 
-    //     if (gamma != 0)
-    //         return m / gamma * (1 - std::exp(- gamma / m * t));
-    //     else
-    //         return t;
-    // };
-
-    // auto v_decay = [this](const double& t){
-    //     if (gamma != 0)
-    //         return std::exp(- gamma / m * t);
-    //     else
-    //         return 1.0;
-    // };
-
     //Modify the particle
     for (auto& pi : particleEDMD_pool){
         const double& Delta_t = reset_event->t - pi->t;
-        // const double& velocity_decay = std::exp(- gamma / m * Delta_t);
 
         // Update accumulated time stored in particle cross
         pi->t = 0; 
@@ -1043,8 +777,6 @@ void EDMD::ExecuteResetNode(const Node& node){
         for (int i = 0; i < 3; ++ i){
             // Calculate the new particle coordinate
             pi->r[i] += pi->v[i] * Delta_t;
-            // Calculate the new particle velocity
-            // pi->v[i] *= velocity_decay;
         }            
     }
     
@@ -1057,6 +789,9 @@ void EDMD::ExecuteResetNode(const Node& node){
             node.mapped()->t -= ResetEvent::TIME_PER_EPOCH_;
             event_tree.insert(std::move(node));
         }
+        //Modify the virial list
+        for (auto& [t, v] : virial)
+            t -= ResetEvent::TIME_PER_EPOCH_;
 
         EraseResetNode(node);
         ++ reset_event->epoch;
@@ -1078,16 +813,25 @@ void EDMD::ExecuteSampleNode(const Node& node){
     /*-------------------------Sampling Desired Data-------------------------*/
     ++ SampleEvent::sampling_time;
 
+    //Pressure
     //Kinetic temperature
-    // sample_event->kinetic_temperature = 0;
-    // for (auto& pi : particleEDMD_pool){
-    //     assert(sample_event->t >= pi->t);
-    //     const double& velocity_decay = std::exp(- gamma / m * (sample_event->t - pi->t));
-    //     const array<double, 3> sample_velocity(pi->v * velocity_decay);
-    //     sample_event->kinetic_temperature += std::accumulate(sample_velocity.begin(), sample_velocity.end(), 0.0, 
-    //     [](const double& sum_of_square, const double& i){ return sum_of_square + i * i;});
-    // }
-    // sample_event->kinetic_temperature /= static_cast<double>(3 * Ntot());
+    long double kinetic_temperature(0);
+    #pragma omp parallel for reduction(+ : kinetic_temperature)
+    for (auto& pi : particleEDMD_pool){
+        assert(sample_event->t >= pi->t);
+        const array<double, 3> sample_velocity(pi->v);
+        kinetic_temperature += dot(sample_velocity, sample_velocity);
+    }
+    kinetic_temperature /= static_cast<double>(3 * particleEDMD_pool.size());
+
+    //Virial
+    long double virial_part(0);
+    for (auto& [t, v] : virial)
+        virial_part += v;
+    virial_part /= 3 * (virial.back().first - virial.front().first);
+
+    const double& pressure = (kinetic_temperature * particleEDMD_pool.size() * kB + virial_part) / (L * L * L); 
+    cout << std::setprecision(4) << sample_event->t << ' ' << kinetic_temperature << ' ' << pressure << endl;
 
     // sample_event->PrintKineticTemperature();
 
@@ -1118,12 +862,12 @@ void EDMD::ExecuteEventTree(){
     const Node& node_execute = event_tree.begin();
     const PtrEvent& event_execute = node_execute->second;
 
-    cout << event_execute->t << ' ' << event_execute->Type() << endl;
+    // cout << event_execute->t << ' ' << event_execute->Type() << endl;
 
-    if (event_execute->Type() == "cross")
+    if (event_execute->Type() == "andersen")
+        ExecuteAndersenNode(node_execute);
+    else if (event_execute->Type() == "cross")
         ExecuteCrossNode(node_execute);
-    // else if (event_execute->Type() == "rest")
-    //     ExecuteRestNode(node_execute);
     else if (event_execute->Type() == "collide")
         ExecuteCollideNode(node_execute);
     else if (event_execute->Type() == "reset")
@@ -1133,18 +877,20 @@ void EDMD::ExecuteEventTree(){
     else if (event_execute->Type() == "squarewell")
         ExecuteSquareWellNode(node_execute);
     else
-        assert(false);
+        assert(("Unexpected event type", false));
 }
 
 void EDMD::ExecuteEDMD(const double& termination_time){
     
     //Initialize event tree
     event_tree.clear();
+    //Andersen thermostat
+    InitializeAndersenNode(0, 1, 3e3);
     //Reset event
-    ResetEvent::SetMaxEpoch(static_cast<int>(std::ceil(termination_time / ResetEvent::TIME_PER_EPOCH_)));
+    ResetEvent::SetMaxEpoch(static_cast<int>(termination_time / ResetEvent::TIME_PER_EPOCH_));
     InitializeResetNode();
     //Sample event
-    InitializeSampleNode(10);
+    InitializeSampleNode(1);
 
     for (PtrParticleEDMD& pi : particleEDMD_pool){
         //Rest events
@@ -1166,13 +912,6 @@ void EDMD::ExecuteEDMD(const double& termination_time){
 
                 InitializeCollideNode(pi, particleEDMD_pool.at(l));
             }
-
-            // for (const int& l : c.particle_list)
-            // if (l > index(&pi, particleEDMD_pool)){
-            // // if (pi->mobility || particleEDMD_pool.at(l)->mobility){
-            //     InitializeCollideNode(pi, particleEDMD_pool.at(l));
-            //     // cout << omp_get_thread_num() << endl;
-            // }
         }
 
         //Squarewell events
