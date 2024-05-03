@@ -831,7 +831,7 @@ void EDMD::ExecuteSampleNode(const Node& node){
     virial_part /= 3 * (virial.back().first - virial.front().first);
 
     const double& pressure = (kinetic_temperature * particleEDMD_pool.size() * kB + virial_part) / (L * L * L); 
-    cout << std::setprecision(4) << sample_event->t << ' ' << kinetic_temperature << ' ' << pressure << endl;
+    cout << std::setprecision(4) << sample_event->t + ResetEvent::epoch * ResetEvent::TIME_PER_EPOCH_ << ' ' << kinetic_temperature << ' ' << pressure << endl;
 
     // sample_event->PrintKineticTemperature();
 
@@ -885,12 +885,12 @@ void EDMD::ExecuteEDMD(const double& termination_time){
     //Initialize event tree
     event_tree.clear();
     //Andersen thermostat
-    InitializeAndersenNode(0, 1, 3e3);
+    InitializeAndersenNode(0, 0.5, 3e3);
     //Reset event
     ResetEvent::SetMaxEpoch(static_cast<int>(termination_time / ResetEvent::TIME_PER_EPOCH_));
     InitializeResetNode();
     //Sample event
-    InitializeSampleNode(1);
+    InitializeSampleNode(10);
 
     for (PtrParticleEDMD& pi : particleEDMD_pool){
         //Rest events
