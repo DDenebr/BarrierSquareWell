@@ -73,7 +73,8 @@ void FFS::InitalizeFirstInterface(const unsigned& experiment_id, const double& b
 
 void FFS::ExecuteInterface(const unsigned& layer_id, const unsigned& experiment_id, const unsigned& dump_pool_size, const double& bath_temperature, const double& simulation_time, const double& sample_interval){
     
-    // const unsigned& layer_id = 1;
+    assert(layer_id >= 1);
+    
     path input_configuration_folder = FFS_folder / ("Lambda" + std::to_string(layer_id - 1)) / ("exp" + std::to_string(experiment_id));
     assert(std::filesystem::exists(input_configuration_folder));
 
@@ -94,7 +95,7 @@ void FFS::ExecuteInterface(const unsigned& layer_id, const unsigned& experiment_
         string line;
         while (std::getline(weight_in, line)){
             std::stringstream ss(line);
-            unsigned input_index, last_index;
+            int input_index, last_index;
             double w, bv;
             ss >> input_index >> last_index >> w >> bv;
             if (input_index >= 0)
@@ -139,6 +140,7 @@ void FFS::ExecuteInterface(const unsigned& layer_id, const unsigned& experiment_
 
         const double& lambda_i = lambda_vec.at(layer_id);
         double weight = 1;
+        double last_bubble_volume = lambda_vec.at(layer_id - 1);
 
         function<void(const double&, EDMD&)> sample_operation = [&](const double& t, EDMD& edmd){
 
@@ -172,9 +174,10 @@ void FFS::ExecuteInterface(const unsigned& layer_id, const unsigned& experiment_
 
                 edmd.InitializeTerminateNode(std::nextafter(t, std::numeric_limits<double>::max()));
             }
+
             //Pruning
             for (int j = layer_id - 2; j >= 0 ; -- j)
-            if (max_bubble_volume < lambda_vec.at(j))
+            if (max_bubble_volume < lambda_vec.at(j) && last_bubble_volume > lambda_vec.at(j))
             //continue
             if (Ur_dice(gen) > terminate_probability)
                 weight /= (1 - terminate_probability);
@@ -186,6 +189,8 @@ void FFS::ExecuteInterface(const unsigned& layer_id, const unsigned& experiment_
 
                 edmd.InitializeTerminateNode(std::nextafter(t, std::numeric_limits<double>::max()));
             }
+
+            last_bubble_volume = max_bubble_volume;
         };
 
         function<void(const double&, EDMD&)> terminate_operation = [&](const double& t, EDMD& edmd){

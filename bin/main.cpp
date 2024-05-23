@@ -80,7 +80,7 @@ int main (int argc, char* argv[]){
 
     FFS ffs(working_folder / "FFS", 20, 130, vector<double>{30, 50, 70, 90, 110}, env);
     // ffs.InitalizeFirstInterface(simulation_no, 1, 100, 0.1);
-    ffs.ExecuteInterface(1, simulation_no, input_layer_size, 1, 1000, 0.1);
+    ffs.ExecuteInterface(2, simulation_no, input_layer_size, 1, 1000, 0.1);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
