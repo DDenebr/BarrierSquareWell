@@ -8,12 +8,11 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                    // "/gekko_home/raop0002/RandomOrganizing/dat/2024-4-24/phi_0.211_steady/DeltaE_0.215_random_critical_dump",  
-                     "/home/raop0002/RandomOrganizing/dat/2024-4-25/DeltaE_0.111_fcc_critical_expand_extra2/phi_0.350_dump",
-                     "output",
-                     "1", "638", "0.35", "0.111", "17",
-                     "Fst" //777
-                     ],
+                    //T rho N gamma Eb no.
+                    //lnputLayer
+                    "1", "0.6", "20000", "1.5", "4", "1",
+                    "53"
+                    ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [

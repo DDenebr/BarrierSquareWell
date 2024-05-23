@@ -2,7 +2,6 @@
 #define SIMULATION_SYSTEM_INCLUDED
 
 #include <filesystem>
-#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -11,7 +10,6 @@
 #include "utilities.h"
 #include "vector_operation.h"
 
-using std::cout, std::cerr, std::endl;
 using std::filesystem::path;
 using std::shared_ptr;
 using std::make_shared;
@@ -26,6 +24,7 @@ class System : public Parameters
 
     //Friend class
     friend System InitializeRandomHardSphereECMC(const Parameters& env);
+    friend System InitializeFromDump(const string& dump_filename, const SquareWellCoefficient& coef);
 
     //Nested struct & template
     struct Cell;
@@ -73,7 +72,10 @@ class System : public Parameters
     void InitializeParticleVelocity(const double& kinetic_temperature);
 
     //Export system configuration to dat file, LAMMPS style
-    void Dump(const path& dump_directory, const string& dump_filename, const unsigned& epoch, const double& current_time);
+    void Dump(const path& dump_directory, const string& dump_filename, const unsigned& epoch, const double& time_per_epoch, const double& current_time);
+
+    //Various properties
+    double KineticTemperature(const double& t);
 
     //TEST
     bool CheckOverlap();

@@ -3,12 +3,14 @@
 
 #include <chrono>
 #include <cstring>
+#include <iostream>
 #include <map>
 #include <numeric>
 #include <random>
 
 #include "vector_operation.h"
 
+using std::cin, std::cout, std::cerr, std::endl;
 using std::map;
 using std::pair;
 using std::string;
@@ -50,6 +52,11 @@ class PeriodicalSquareBox
         std::swap (L, box.L);
         std::swap (l, box.l);
     };
+
+    int cellnumber() {return n;};
+    double boxlength() {return L;};
+    double celllength() {return l;};
+    
     
     protected:
     int n;                 //cell number per edge
@@ -89,7 +96,10 @@ class SquareWellCoefficient
         std::swap (squarewell_width, coef.squarewell_width);
         std::swap (squarewell_depth, coef.squarewell_depth);
         std::swap (squarewell_barrier, coef.squarewell_barrier);
-    }
+    };
+    double width() const {return squarewell_width;};
+    double depth() const {return squarewell_depth;};
+    double barrier() const {return squarewell_barrier;};
     
     protected:             
     double squarewell_width;          //attraction range of the square well
@@ -113,16 +123,18 @@ class Parameters : public Unit, public PeriodicalSquareBox, public SquareWellCoe
         Unit(), 
         PeriodicalSquareBox(box_length, cell_number_per_edge), 
         SquareWellCoefficient(width, depth, barrier) {
-        // seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        seed = 4087653448;
+        seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        cout << seed << endl;
+        // seed = 4087653448;
         gen.seed(seed);
     };
     Parameters(const PeriodicalSquareBox& simulation_box, const SquareWellCoefficient& square_well_coefficient) :
         Unit(), 
         PeriodicalSquareBox(simulation_box), 
         SquareWellCoefficient(square_well_coefficient) {
-        // seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        seed = 4087653448;
+        seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        cout << seed << endl;
+        // seed = 4087653448;
         gen.seed(seed);
     };
     //Copy constructor

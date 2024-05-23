@@ -2,10 +2,12 @@
 #define EVENT_DRIVEN_MOLECULAR_DYNAMICS_INCLUDED
 
 #include <list>
+#include <functional>
 
 #include "simulation_system.h"
 
 using std::list;
+using std::function;
 
 #define MAX_PARTICLE_COLLIDE_NODE_LIST_SIZE 64
 #define MAX_PARTICLE_SQUAREWELL_NODE_LIST_SIZE 64
@@ -24,6 +26,7 @@ class EDMD : public System
     class CrossEvent;
     class CollideEvent;
     class ResetEvent;
+    class TerminateEvent;
     class SampleEvent;
     class AndersenThermostatEvent;
 
@@ -51,7 +54,15 @@ class EDMD : public System
     virtual ~EDMD() = default;
 
     //Initialize kinetic temperature data output filestream
-    void SetSamplingParameters(const double& sample_interval, const path& dump_directory);
+    void SetSamplingParameters(const string& sample_mode, const double& sample_interval, const vector<string>& sample_properties, const path& dump_directory);
+    void SetResetParameters(const double& time_per_epoch);
+    void SetResetEpoch(const double& total_time);
+    void SetSamplingOperation(function<void(const double&, EDMD&)> sample_operation);
+    void SetTerminateOperation(function<void(const double&, EDMD&)> terminate_operation);
+    int GetEpoch();
+    double GetTimePerEpoch();
+    double GetSamplingTime();
+
 
     //Event Functions
     //Add event in particle event list
@@ -70,6 +81,7 @@ class EDMD : public System
     void InitializeSquareWellNode(PtrParticleEDMD& particle_squarewell1, PtrParticleEDMD& particle_squarewell2);
     void InitializeAndersenNode(const double& last_thermostat_time, const double& T_bath, const double& lambda);
     void InitializeResetNode();
+    void InitializeTerminateNode(const double& terminate_time);
     void InitializeSampleNode(const double& sampling_time);
 
     //Event erase
@@ -78,6 +90,7 @@ class EDMD : public System
     void EraseSquareWellNode(const PtrParticleEDMD& particle_squarewell);
     void EraseAndersenNode(const Node& node_andersen);
     void EraseResetNode(const Node& node_reset);
+    void EraseTerminateNode(const Node& node_terminate);
     void EraseSampleNode(const Node& node_sample);
 
     //Event execution
@@ -86,23 +99,80 @@ class EDMD : public System
     void ExecuteSquareWellNode(const Node& node);
     void ExecuteAndersenNode(const Node& node);
     void ExecuteResetNode(const Node& node);
+    void ExecuteTerminateNode(const Node& node);
     void ExecuteSampleNode(const Node& node);
 
     //Tree execution
     void ExecuteEventTree();
 
     //EDMD
-    void ExecuteEDMD(const double& termination_time);
+    void ExecuteEDMD(const double& termination_time, const double& bath_temperature, const double& thermostat_frequency, const double& initial_sample_time);
+
+    //Various properties
+    double Pressure(const double& t);
+    double MaximumBubbleVolume(const double& t);
 
     protected:
     vector<PtrParticleEDMD> particleEDMD_pool;
     Tree event_tree;
     list<pair<double, double>> virial;
 
- 
     double diameter_max;
     int collision_search_range;
     int squarewell_search_range;
+
+    //Reset
+    int epoch = 0;
+    double TIME_PER_EPOCH_ = 100;
+    int max_epoch = 0;
+    double time_remainder = 0;
+
+    //Sampling
+    int sampling_time = 0;
+    double sampling_interval = 0.1;
+    string sampling_mode = "Arithmetic";
+    vector<string> sampling_property_list{"dump"};
+    path dump_directory;
+
+    function<void(const double&, EDMD&)> sampling_operation = [&](const double& t, EDMD& edmd){
+
+        const auto& properties = sampling_property_list;
+        map<string, double> property_map;
+
+        if (std::find(properties.begin(), properties.end(), "dump") != properties.end()){
+            assert(std::filesystem::exists(dump_directory));
+            const int& epoch = GetEpoch();
+            const double& time_per_epoch = GetTimePerEpoch();
+            std::stringstream dump_filename;
+            dump_filename << "dump_" << sampling_time << ".dat";
+            // if (sample_event->kinetic_temperature != 0)
+            edmd.Dump(dump_directory, dump_filename.str(), epoch, time_per_epoch, t);
+            property_map.emplace("time", t + epoch * time_per_epoch);
+        }
+
+        if (std::find(properties.begin(), properties.end(), "time") != properties.end()){
+            property_map.emplace("time", t + epoch * TIME_PER_EPOCH_);
+        }
+
+        if (std::find(properties.begin(), properties.end(), "temperature") != properties.end()){
+            const double& kinetic_temperature = edmd.KineticTemperature(t);
+            property_map.emplace("temperature", kinetic_temperature);
+        }
+
+        if (std::find(properties.begin(), properties.end(), "pressure") != properties.end()){
+            const double& pressure = edmd.Pressure(t);
+            property_map.emplace("pressure", pressure);
+        }
+
+        if (std::find(properties.begin(), properties.end(), "bubble") != properties.end()){
+            const double& max_bubble_volume = edmd.MaximumBubbleVolume(t);
+            property_map.emplace("bubble", max_bubble_volume);
+        }
+
+        for (const auto& [name, value] : property_map)
+            cout << std::setprecision(4) << value << ' ';
+        cout << endl;
+    };
 };
 
 class EDMD::ParticleEDMD : public Particle

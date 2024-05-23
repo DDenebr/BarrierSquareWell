@@ -19,13 +19,44 @@ EDMD::EDMD(const System& system) :
     squarewell_search_range = static_cast<int>(std::ceil(squarewell_width));
 };
 
-void EDMD::SetSamplingParameters(const double& sample_interval, const path& dump_directory){
-    SampleEvent::sampling_time = 0;
-    SampleEvent::sampling_interval = sample_interval;
-    SampleEvent::dump_directory = dump_directory;
+void EDMD::SetSamplingParameters(const string& sample_mode, const double& sample_interval, const vector<string>& sample_properties, const path& dump_directory){
+    this->sampling_time = 0;
+    this->sampling_mode = sample_mode;
+    this->sampling_interval = sample_interval;
+    this->sampling_property_list = sample_properties;
+    this->dump_directory = dump_directory;
     // SampleEvent::kinetic_termperature_output.open(filename_kinetic_temperature, std::ios::trunc);
     // assert(SampleEvent::kinetic_termperature_output.is_open());
 };
+
+void EDMD::SetSamplingOperation(function<void(const double&, EDMD&)> sample_operation){
+    sampling_operation = sample_operation;
+}
+
+void EDMD::SetTerminateOperation(function<void(const double&, EDMD&)> terminate_operation){
+    TerminateEvent::terminate_operation = terminate_operation;
+}
+
+void EDMD::SetResetParameters(const double& time_per_epoch){
+    TIME_PER_EPOCH_ = time_per_epoch;
+}
+
+void EDMD::SetResetEpoch(const double& total_time){
+    epoch = 0;
+    time_remainder = std::remquo(total_time, TIME_PER_EPOCH_, &max_epoch);
+};
+
+int EDMD::GetEpoch() {
+    return epoch; 
+};
+
+double EDMD::GetTimePerEpoch(){
+    return TIME_PER_EPOCH_;
+}
+
+double EDMD::GetSamplingTime(){
+    return sampling_time;
+}
 
 void EDMD::AddCrossInParticle(const Node& node_cross){
     const shared_ptr<CrossEvent>& cross_event = std::dynamic_pointer_cast<CrossEvent>(node_cross->second);
@@ -268,9 +299,29 @@ void EDMD::InitializeAndersenNode(const double& last_thermostat_time, const doub
 
 //Initialize reset event node
 void EDMD::InitializeResetNode(){
+    //If reach the max epoch, initialize terminate event
+    if (epoch >= max_epoch)
+        InitializeTerminateNode(time_remainder);
+    else{
+        // Emplace node on event tree
+        PtrEvent reset_event = std::dynamic_pointer_cast<Event>(make_shared<ResetEvent>(ResetEvent(TIME_PER_EPOCH_)));
+        auto itr_bool = event_tree.emplace(TIME_PER_EPOCH_, reset_event);
+        assert(itr_bool.second);
+    }
+}
+
+//Initialize terminate event node
+void EDMD::InitializeTerminateNode(const double& terminate_time){
     // Emplace node on event tree
-    const PtrEvent& reset_event = std::dynamic_pointer_cast<Event>(make_shared<ResetEvent>(ResetEvent()));
-    auto itr_bool = event_tree.emplace(ResetEvent::TIME_PER_EPOCH_, reset_event);
+    PtrEvent terminate_event = std::dynamic_pointer_cast<Event>(make_shared<TerminateEvent>(TerminateEvent(terminate_time)));
+    auto itr_bool = event_tree.emplace(terminate_time, terminate_event);
+    double t = terminate_time;
+    while(!itr_bool.second){
+        // t += std::numeric_limits<double>::epsilon() * std::exp2(std::floor(std::log2(t)) - 1.0) * (1.0 + std::numeric_limits<double>::epsilon());
+        t = std::nextafter(t, std::numeric_limits<double>::max());
+        terminate_event = std::dynamic_pointer_cast<Event>(make_shared<TerminateEvent>(TerminateEvent(t)));
+        itr_bool = event_tree.emplace(t, terminate_event);
+    }
     assert(itr_bool.second);
 }
 
@@ -324,6 +375,11 @@ void EDMD::EraseAndersenNode(const Node& node_andersen){
 //Erase reset event node
 void EDMD::EraseResetNode(const Node& node_reset){
     event_tree.erase(node_reset);
+}
+
+//Erase terminate node
+void EDMD::EraseTerminateNode(const Node& node_terminate){
+    event_tree.erase(node_terminate);
 }
 
 //Erase sample event node
@@ -781,20 +837,20 @@ void EDMD::ExecuteResetNode(const Node& node){
     }
     
     //Reset the time to decrease numeric error
-    if (reset_event->epoch < ResetEvent::max_epoch){
+    if (epoch < max_epoch){
         //Modify the event tree
         for (auto i = event_tree.begin(); i != event_tree.end(); ++ i){
             auto node = event_tree.extract(i);
-            node.key() -= ResetEvent::TIME_PER_EPOCH_;
-            node.mapped()->t -= ResetEvent::TIME_PER_EPOCH_;
+            node.key() -= TIME_PER_EPOCH_;
+            node.mapped()->t -= TIME_PER_EPOCH_;
             event_tree.insert(std::move(node));
         }
         //Modify the virial list
         for (auto& [t, v] : virial)
-            t -= ResetEvent::TIME_PER_EPOCH_;
+            t -= TIME_PER_EPOCH_;
 
         EraseResetNode(node);
-        ++ reset_event->epoch;
+        ++ epoch;
         InitializeResetNode();
     }
     else{
@@ -805,52 +861,42 @@ void EDMD::ExecuteResetNode(const Node& node){
     }
 }
 
+void EDMD::ExecuteTerminateNode(const Node& node){
+    const shared_ptr<TerminateEvent>& terminate_event = std::dynamic_pointer_cast<TerminateEvent>(node->second);
+    assert(terminate_event != shared_ptr<TerminateEvent>());
+    
+    //Terminate operation
+    TerminateEvent::terminate_operation(terminate_event->t, *this);
+
+    event_tree.clear();
+}
+
 //Execute sample event
 void EDMD::ExecuteSampleNode(const Node& node){
     const shared_ptr<SampleEvent>& sample_event = std::dynamic_pointer_cast<SampleEvent>(node->second);
     assert(sample_event != shared_ptr<SampleEvent>());
 
     /*-------------------------Sampling Desired Data-------------------------*/
-    ++ SampleEvent::sampling_time;
-
-    //Pressure
-    //Kinetic temperature
-    long double kinetic_temperature(0);
-    #pragma omp parallel for reduction(+ : kinetic_temperature)
-    for (auto& pi : particleEDMD_pool){
-        assert(sample_event->t >= pi->t);
-        const array<double, 3> sample_velocity(pi->v);
-        kinetic_temperature += dot(sample_velocity, sample_velocity);
-    }
-    kinetic_temperature /= static_cast<double>(3 * particleEDMD_pool.size());
-
-    //Virial
-    long double virial_part(0);
-    for (auto& [t, v] : virial)
-        virial_part += v;
-    virial_part /= 3 * (virial.back().first - virial.front().first);
-
-    const double& pressure = (kinetic_temperature * particleEDMD_pool.size() * kB + virial_part) / (L * L * L); 
-    cout << std::setprecision(4) << sample_event->t + ResetEvent::epoch * ResetEvent::TIME_PER_EPOCH_ << ' ' << kinetic_temperature << ' ' << pressure << endl;
-
-    // sample_event->PrintKineticTemperature();
-
-    //Dump
-    assert(std::filesystem::exists(SampleEvent::dump_directory));
-    const int& epoch = ResetEvent::GetEpoch(node);
-    std::stringstream dump_filename;
-    dump_filename << "dump_" << SampleEvent::sampling_time << ".dat";
-    // if (sample_event->kinetic_temperature != 0)
-        Dump(SampleEvent::dump_directory, dump_filename.str(), epoch, sample_event->t);
-
+    ++ sampling_time;
+    sampling_operation(sample_event->t, *this);
+    // const auto& properties = SampleEvent::sampling_property_list;
+    // map<string, double> property_map;
+    
     /*-----------------------------------------------------------------------*/
     const double& last_sampling_time = sample_event->t;
     EraseSampleNode(node);
-    //Arithmetic sequences sampling time
-    // InitializeSampleNode(last_sampling_time + SampleEvent::sampling_interval);
-    //Geometric sequences sampling time
-    InitializeSampleNode(last_sampling_time + SampleEvent::sampling_interval);
-    SampleEvent::sampling_interval *= std::pow(10.0, 0.01);
+
+    if (sampling_mode == "Arithmetic")
+        //Arithmetic sequences sampling time
+        InitializeSampleNode(last_sampling_time + sampling_interval);
+    else if (sampling_mode == "Geometric"){
+        //Geometric sequences sampling time
+        InitializeSampleNode(last_sampling_time + sampling_interval);
+        sampling_interval *= std::pow(10.0, 0.01);
+    }
+    else 
+        assert(("unknown sampling mode", false));
+        
 }
 
 
@@ -872,6 +918,8 @@ void EDMD::ExecuteEventTree(){
         ExecuteCollideNode(node_execute);
     else if (event_execute->Type() == "reset")
         ExecuteResetNode(node_execute);
+    else if (event_execute->Type() == "terminate")
+        ExecuteTerminateNode(node_execute);
     else if (event_execute->Type() == "sample")
         ExecuteSampleNode(node_execute);
     else if (event_execute->Type() == "squarewell")
@@ -880,17 +928,17 @@ void EDMD::ExecuteEventTree(){
         assert(("Unexpected event type", false));
 }
 
-void EDMD::ExecuteEDMD(const double& termination_time){
+void EDMD::ExecuteEDMD(const double& termination_time, const double& bath_temperature, const double& thermostat_frequency, const double& initial_sample_time){
     
     //Initialize event tree
     event_tree.clear();
     //Andersen thermostat
-    InitializeAndersenNode(0, 0.5, 3e3);
+    InitializeAndersenNode(0, bath_temperature, thermostat_frequency);
     //Reset event
-    ResetEvent::SetMaxEpoch(static_cast<int>(termination_time / ResetEvent::TIME_PER_EPOCH_));
+    SetResetEpoch(termination_time);
     InitializeResetNode();
     //Sample event
-    InitializeSampleNode(10);
+    InitializeSampleNode(initial_sample_time);
 
     for (PtrParticleEDMD& pi : particleEDMD_pool){
         //Rest events
@@ -937,3 +985,148 @@ void EDMD::ExecuteEDMD(const double& termination_time){
         ++ node_execute_times;
     }
 };
+
+double EDMD::Pressure(const double& t){
+    //Pressure
+    //Kinetic temperature
+    const double& kinetic_temperature = KineticTemperature(t);
+
+    //Virial
+    long double virial_part(0);
+    for (auto& [t, v] : virial)
+        virial_part += v;
+    virial_part /= 3 * (virial.back().first - virial.front().first);
+
+    return (kinetic_temperature * particleEDMD_pool.size() * kB + virial_part) / (L * L * L); 
+}
+
+
+double EDMD::MaximumBubbleVolume(const double& t){
+
+    //resolution
+    const int& nb = static_cast<int>(std::floor(L / diameter_max) * 2);
+    const double& lb = L / nb;
+    
+    const int& vapor_neighbor_threshold = 5;
+    const int& bubble_neighbor_threshold = 7;
+
+    struct LocalInfo
+    {
+        //0 liquid, 1 vapor, 2 vapor after 1 neighbor check, 3 vapor afte 2 neighbor check
+        int status;
+        //number of vapor neighbor
+        int vapor_neighbor;
+        //index of bubble
+        int bubble_index;
+
+        LocalInfo(const int& s, const int& n, const int& i){
+            status = s; vapor_neighbor = n; bubble_index = i;
+        };
+    };
+    
+    //Initialize LocalInfo as vapor
+    vector<vector<vector<LocalInfo>>> bubble_grid(nb, vector<vector<LocalInfo>>(nb, vector<LocalInfo>(nb, LocalInfo(1, -1, 0))));
+
+    //Preliminary calculate vapor bubble
+    // #pragma omp parallel for collapse(3) num_threads(8)
+    for (int bi = 0; bi < nb; ++ bi)
+    for (int bj = 0; bj < nb; ++ bj)
+    for (int bk = 0; bk < nb; ++ bk){
+
+        const array<double, 3>& position{bi * lb, bj * lb, bk * lb};
+        const array<int, 3>& c{static_cast<int>(bi * lb / l), static_cast<int>(bj * lb / l), static_cast<int>(bk * lb / l)};
+        const array<double, 3> r{bi * lb / l - c[0], bj * lb / l - c[1], bk * lb / l - c[2]};
+        Particle test_point("test_point", 0, 0, t);
+        test_point.location(c, r);
+
+        bool flag = true;
+        for (int i =- 1; i <= 1 && flag; ++ i)
+        for (int j =- 1; j <= 1 && flag; ++ j)
+        for (int k =- 1; k <= 1 && flag; ++ k){
+            const auto& nc = cell_grid[(c[0] + i + n) % n][(c[1] + j + n) % n][(c[2] + k + n) % n];
+
+            for (const auto& l : nc.particle_list){
+                const auto& np = particleEDMD_pool[l];
+                const auto& d = distance(test_point, *np, t);
+                //Determine if the test point is vapor or liquid
+                if (d < np->d && np->neighbor_list.size() >= vapor_neighbor_threshold){
+                    
+                    // #pragma omp critical
+                    bubble_grid[bi][bj][bk].status = 0;
+
+                    flag = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    //Calculate neighbor
+    for (int bi = 0; bi < nb; ++ bi)
+    for (int bj = 0; bj < nb; ++ bj)
+    for (int bk = 0; bk < nb; ++ bk)
+    if (bubble_grid[bi][bj][bk].status == 1)
+        for (int i =- 1; i <= 1; ++ i)
+        for (int j =- 1; j <= 1; ++ j)
+        for (int k =- 1; k <= 1; ++ k)
+            bubble_grid[bi][bj][bk].vapor_neighbor += bubble_grid[(bi + i + nb) % nb][(bj + j + nb) % nb][(bk + k + nb) % nb].status;
+
+    //Neighbor test (>threshold)
+    for (int bi = 0; bi < nb; ++ bi)
+    for (int bj = 0; bj < nb; ++ bj)
+    for (int bk = 0; bk < nb; ++ bk)
+    if (bubble_grid[bi][bj][bk].status > 0){
+        if (bubble_grid[bi][bj][bk].vapor_neighbor > bubble_neighbor_threshold)
+            ++ bubble_grid[bi][bj][bk].status;
+        
+        int second_neighbor_counts = 0;
+        for (int i =- 1; i <= 1; ++ i)
+        for (int j =- 1; j <= 1; ++ j)
+        for (int k =- 1; k <= 1; ++ k)
+        if (bubble_grid[(bi + i + nb) % nb][(bj + j + nb) % nb][(bk + k + nb) % nb].vapor_neighbor > bubble_neighbor_threshold)
+            ++ second_neighbor_counts;
+        if (second_neighbor_counts > bubble_neighbor_threshold)
+            ++ bubble_grid[bi][bj][bk].status;
+    }
+
+    //Calculate bubble volume
+    // vector<vector<vector<int>>> bubble_list(nb, vector<vector<int>>(nb, vector<int>(nb, 0)));
+    vector<int> bubble_volume_list;
+    bubble_volume_list.reserve(32);
+
+    int bubble_index = 1;
+    for (int bi = 0; bi < nb; ++ bi)
+    for (int bj = 0; bj < nb; ++ bj)
+    for (int bk = 0; bk < nb; ++ bk)
+    if (bubble_grid[bi][bj][bk].status == 3)
+    if (bubble_grid[bi][bj][bk].bubble_index == 0){
+        
+        //Breadth first search
+        list<array<int, 3>> queue;
+        //Origin
+        queue.emplace_back(array<int, 3>{bi, bj, bk});
+        bubble_grid[bi][bj][bk].bubble_index = bubble_index;
+        auto cursor = queue.begin();
+        //Search
+        while (cursor != queue.end()){
+            const auto& current_vertice = *cursor;
+            bubble_grid[current_vertice[0]][current_vertice[1]][current_vertice[2]].bubble_index = bubble_index;
+            for (int i =- 1; i <= 1; ++ i)
+            for (int j =- 1; j <= 1; ++ j)
+            for (int k =- 1; k <= 1; ++ k){
+                const int& cx = (current_vertice[0] + i + nb) % nb;
+                const int& cy = (current_vertice[1] + j + nb) % nb;
+                const int& cz = (current_vertice[2] + k + nb) % nb;
+                if (bubble_grid[cx][cy][cz].status == 3)
+                if (std::find(queue.begin(), queue.end(), array<int, 3>{cx, cy, cz}) == queue.end()){
+                    queue.emplace_back(array<int, 3>{cx, cy, cz});
+                }
+            }
+            ++ cursor;
+        }
+        ++ bubble_index;
+        bubble_volume_list.emplace_back(queue.size());
+    }
+
+    return *std::max_element(bubble_volume_list.begin(), bubble_volume_list.end()) * lb * lb * lb;
+}

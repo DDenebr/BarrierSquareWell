@@ -185,7 +185,7 @@ void System::InitializeParticleVelocity(const double& kinetic_temperature){
     pi->velocity(array<double, 3>{gaussian_generator(gen), gaussian_generator(gen), gaussian_generator(gen)});
 };
 
-void System::Dump(const path& dump_directory, const string& dump_filename, const unsigned& epoch, const double& current_time){
+void System::Dump(const path& dump_directory, const string& dump_filename, const unsigned& epoch, const double& time_per_epoch, const double& current_time){
 
     std::filesystem::create_directories(dump_directory);
     assert(std::filesystem::exists(dump_directory));
@@ -194,7 +194,7 @@ void System::Dump(const path& dump_directory, const string& dump_filename, const
     assert(dump_out.is_open());
 
     dump_out << "ITEM: TIMESTEP" << endl;
-    dump_out << epoch << ' ' << std::hexfloat << current_time << endl;
+    dump_out << epoch << ' ' << std::hexfloat << time_per_epoch << ' ' << current_time << endl;
     // dump_out << real_time << endl;
 
     dump_out << "ITEM: NUMBER OF ATOMS" << endl;
@@ -214,12 +214,23 @@ void System::Dump(const path& dump_directory, const string& dump_filename, const
         dump_out << std::hexfloat << static_cast<double>(particle->b[i]) * L + static_cast<double>(particle->c[i]) * l + particle->r[i] + particle->v[i] * (current_time - particle->t) << ' ';
         // dump_out << (static_cast<double>(particle->c[i]) * l + particle->r[i] + particle->v[i] * t_prime(current_time - particle->t)) << ' ';
         for (int i = 0; i < 3; ++ i)
-        dump_out << std::hexfloat << particle->v[i] * (current_time - particle->t) << ' ';
+        dump_out << std::hexfloat << particle->v[i] << ' ';
         // dump_out << particle->v[i] * v_decay(current_time - particle->t) << ' ';
         dump_out << endl;
     }
 
     dump_out.close();
+}
+
+double System::KineticTemperature(const double& t){
+    long double kinetic_temperature = 0;
+    // #pragma omp parallel for reduction(+ : kinetic_temperature) num_threads(8)
+    for (auto& pi : particle_pool){
+        assert(t >= pi->t);
+        kinetic_temperature += dot(pi->v, pi->v);
+    }
+    kinetic_temperature /= static_cast<double>(3 * particle_pool.size());
+    return static_cast<double>(kinetic_temperature);
 }
 
 bool System::CheckOverlap(){

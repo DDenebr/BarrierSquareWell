@@ -159,7 +159,10 @@ class EDMD::ResetEvent : public Event
 
     //Default constructor
     ResetEvent() : 
-        Event(TIME_PER_EPOCH_){
+        Event(){
+    };
+    ResetEvent(const double& time_per_epoch) : 
+        Event(time_per_epoch){
     };
     //Copy constructor
     ResetEvent(const ResetEvent&) = default;
@@ -185,22 +188,53 @@ class EDMD::ResetEvent : public Event
         ResetEvent().swap(*this);
     };
 
-    static void SetMaxEpoch(const int& max_epoch);
-    static int GetEpoch(const Node& node);
+    protected:
+};
+
+class EDMD::TerminateEvent : public Event
+{
+    public:
+    //Friend class
+    friend class EDMD;
+    friend class ParticleEDMD;
+
+    //Type
+    virtual string Type() const override{
+        return "terminate";
+    }
+
+    //Default constructor
+    TerminateEvent() = default; 
+    //Constructor
+    TerminateEvent(const double& time) :
+        Event(time) {
+    };
+    //Copy constructor
+    TerminateEvent(const TerminateEvent&) = default;
+    //Move constructor
+    TerminateEvent(TerminateEvent&&) = default;
+    //Destructor
+    virtual ~TerminateEvent() = default;
+    //Virtual copy constructor
+    virtual PtrEvent clone() const override {
+        return PtrEvent(new TerminateEvent(*this));
+    };
+    //Swap (copy and swap idiom)
+    void swap(TerminateEvent& terminate_event){
+        std::swap(t, terminate_event.t);
+    }
+    //Unify copy assignment
+    TerminateEvent& operator=(TerminateEvent terminate_event){
+        terminate_event.swap(*this);
+        return *this;
+    }
+    //Clear
+    virtual void clear() override{
+        TerminateEvent().swap(*this);
+    };
 
     protected:
-    inline static int epoch = 0;
-    inline static const double TIME_PER_EPOCH_ = 10;
-    inline static int max_epoch = 0;
-};
-
-inline void EDMD::ResetEvent::SetMaxEpoch(const int& max_epoch){
-    ResetEvent::epoch = 0;
-    ResetEvent::max_epoch = max_epoch;
-};
-
-inline int EDMD::ResetEvent::GetEpoch(const Node& node) {
-    return epoch; 
+    inline static function<void(const double&, EDMD&)> terminate_operation;
 };
 
 class EDMD::SampleEvent : public Event
@@ -253,10 +287,6 @@ class EDMD::SampleEvent : public Event
     // };
 
     protected:
-    inline static int sampling_time = 0;
-    inline static double sampling_interval = 0.1;
-    // inline static ofstream kinetic_termperature_output;
-    inline static path dump_directory;
 
     // double kinetic_temperature;
 

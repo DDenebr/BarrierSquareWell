@@ -2,3 +2,5 @@ build/
 dump/
 log/
 task.pbs
+FFS/
+.vscode/

@@ -1,4 +1,11 @@
+#include <fstream>
+#include <iterator>
+#include <sstream>
+
 #include "initialization.h"
+
+using std::ifstream;
+using std::stringstream;
 
 System InitializeRandomHardSphereECMC(const Parameters& env){
     //Create an system
@@ -240,6 +247,107 @@ System InitializeRandomHardSphereECMC(const Parameters& env){
             }
         }   
     }
+    return system;
+}
+
+System InitializeFromDump(const string& dump_filename, const SquareWellCoefficient& coef){
+
+    ifstream dump_in(dump_filename, std::ios::in);
+    assert(dump_in.is_open());
+
+    string line;
+    //Read time
+    dump_in.ignore(std::numeric_limits<std::streamsize>::max(), dump_in.widen('\n'));
+    std::getline(dump_in, line);
+    // const double& t = std::stod(line);
+    std::stringstream epoch_time(line);
+    int epoch; string time_per_epoch; string time;
+    epoch_time >> epoch >> time_per_epoch >> time;
+    // epoch_time >> epoch >> time;
+    const double& t = std::stod(time);
+
+    //Read particle number
+    dump_in.ignore(std::numeric_limits<std::streamsize>::max(), dump_in.widen('\n'));
+    std::getline(dump_in, line);
+    const int& N = std::stoi(line);
+
+    //Read box size
+    dump_in.ignore(std::numeric_limits<std::streamsize>::max(), dump_in.widen('\n'));
+    dump_in.ignore(std::numeric_limits<std::streamsize>::max(), dump_in.widen(' '));
+    std::getline(dump_in, line);
+    const double& L = std::stod(line);
+    dump_in.ignore(std::numeric_limits<std::streamsize>::max(), dump_in.widen('\n'));
+    dump_in.ignore(std::numeric_limits<std::streamsize>::max(), dump_in.widen('\n'));
+
+    //Read particle information
+    vector<array<string, 9>> particle_inforamtion;
+    map<string, pair<double, int>> particle_data;
+
+    particle_inforamtion.reserve(N);
+    dump_in.ignore(std::numeric_limits<std::streamsize>::max(), dump_in.widen('\n'));
+    while (std::getline(dump_in, line)){
+        stringstream ss(line);
+        array<string, 9> particle;
+        std::copy(std::istream_iterator<string>(ss), std::istream_iterator<string>(), particle.begin());
+        particle_inforamtion.emplace_back(particle);
+
+        //Update particle data
+        const string& type = particle[1];
+        const double& diameter = std::stod(particle[2]);
+        if (particle_data.find(type) == particle_data.end())
+            particle_data.emplace(type, pair<double, int>{diameter, 1});
+        else{
+            assert(particle_data.at(type).first == diameter);
+            ++ particle_data.at(type).second;
+        }
+    }
+
+    // const double& diameter_max = std::max_element(particle_data.begin(), particle_data.end(), 
+    //     [](const pair<string, pair<double, int>>& largest, const pair<string, pair<double, int>>& first)
+    //     {return largest.second.first < first.second.first;})->second.first;
+
+    const int& n = static_cast<int>(std::floor(L / coef.width()));
+
+    System system(Parameters(PeriodicalSquareBox(L, n), coef));
+    for (const auto& [type, info] : particle_data)
+        system.CreateAtom(type, 1, info.first, info.second);
+    
+    auto& cell_grid = system.cell_grid;
+    auto& particle_pool = system.particle_pool;
+
+    for (const auto& particle_data : particle_inforamtion){
+        
+        const string& type = particle_data[1];
+        const double& d = std::stod(particle_data[2]);
+        
+        //Create particle
+        System::PtrParticle particle(make_shared<System::Particle>(type, d, 1.0, 0.0));
+
+        //Particle location and velocity
+        array<double, 3> location{std::stod(particle_data[3]), std::stod(particle_data[4]), std::stod(particle_data[5])};
+        const array<double, 3>& velocity{std::stod(particle_data[6]), std::stod(particle_data[7]), std::stod(particle_data[8])};
+        array<int, 3> c{};
+        array<double, 3> r{};
+        for (int i = 0; i < 3; ++ i){
+            if (location[i] < 0)
+                location[i] = std::fmod(location[i], L) + L;
+            if (location[i] > L)
+                location[i] = std::fmod(location[i], L);
+            assert(location[i] > 0 && location[i] < L);
+            r[i] = std::fmod(location[i], system.l);
+            c[i] = static_cast<int>(std::round((location[i] - r[i]) / system.l));
+        }
+
+        particle->location(c, r);
+        particle->velocity(velocity);
+
+        //Insert particle into particle pool
+        particle_pool.emplace_back(particle);  
+
+        //Add particle into cell
+        system.AddParticleInCell(particle_pool.back());
+    }
+
     return system;
 }
 

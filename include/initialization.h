@@ -5,4 +5,6 @@
 
 System InitializeRandomHardSphereECMC(const Parameters& env);
 
+System InitializeFromDump(const string& dump_filename, const SquareWellCoefficient& coef);
+
 #endif
